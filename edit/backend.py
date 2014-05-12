@@ -33,6 +33,9 @@ prefixes = u"\n    ".join("%s: %s" % (k.lower(), v)
 #namespace setup complete
 
 class BaseBackend(object):
+    """
+    Common methods for all backends.
+    """
 
     def make_uuid_uri(self, prefix='n'):
         return D[str(uuid.uuid4())]
