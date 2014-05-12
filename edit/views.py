@@ -104,13 +104,12 @@ class PersonView(TemplateView, ResourceView):
         return out
 
     def get_context_data(self, local_name=None, **kwargs):
-        from backend import D, VIVO, vstore
+        from backend import D, VIVO, vstore, RDFS
         from display import person
         context = super(PersonView, self).get_context_data(**kwargs)
         uri = D[local_name]
         context['uri'] = uri
-        context['name'] = "Smith, James"
-        context['overview'] = "A short bio"
+        context['name'] = vstore.value(subject=uri, predicate=RDFS.label)
         context['sections'] = person
         #This will come from a sparql query.
         profile = {

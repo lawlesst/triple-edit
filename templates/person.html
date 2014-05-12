@@ -3,6 +3,7 @@
 {% block content %}
 <div class="row">
     <h1>Person</h1>
+    <h2> {{ name }}</h2>
     {% for section in sections %}
       <h3>{{ section.label }}</h3>
       {% if section.etype == "ckedit" %}
