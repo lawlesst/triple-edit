@@ -1,0 +1,10 @@
+<div>
+    <p>
+      <input type="hidden" class="multitag" id="{{ section.id }}" data-subject="{{ uri }}" data-predicate="{{ section.predicate }}" data-range="{{ section.range }}" style="width:500px;"/>
+      {% if section.data %}
+        <script>
+          var {{ section.id}}InitData = {{ section.data|safe}};
+        </script>
+      {% endif %}
+    </p>
+</div>

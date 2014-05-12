@@ -9,29 +9,9 @@
     {% for section in sections %}
       <h3>{{ section.label }}</h3>
       {% if section.etype == "ckedit" %}
-        <div id="{{ section.id }}" data-subject="{{ uri }}" data-predicate="{{ section.predicate }}" class="ckedit well" contenteditable="true">
-              {% if section.data %}
-                {{ section.data|safe }}
-              {% else %}
-                Click here to add a {{ section.label|lower }}.
-              {% endif %}
-        </div>
-        <div class="ck-save">
-            <div class="btn-group">
-              <button class="btn">Save</button>
-            </div>
-        </div>
+        {% include "snippets/ckedit.html" %}
       {% elif section.etype == "multi-tag" %}
-          <div>
-            <p>
-              <input type="hidden" class="multitag" id="{{ section.id }}" data-subject="{{ uri }}" data-predicate="{{ section.predicate }}" data-range="{{ section.range }}" style="width:500px;"/>
-              {% if section.data %}
-                <script>
-                  var {{ section.id}}InitData = {{ section.data|safe}};
-                </script>
-              {% endif %}
-            </p>
-          </div>
+          {% include "snippets/multi-tag.html" %}
       {% endif %}
       <hr/>
     {% endfor %}

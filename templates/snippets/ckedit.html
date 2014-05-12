@@ -1,0 +1,12 @@
+<div id="{{ section.id }}" data-subject="{{ uri }}" data-predicate="{{ section.predicate }}" class="ckedit well" contenteditable="true">
+              {% if section.data %}
+                {{ section.data|safe }}
+              {% else %}
+                Click here to add a {{ section.label|lower }}.
+              {% endif %}
+</div>
+<div class="ck-save">
+    <div class="btn-group">
+      <button class="btn">Save</button>
+    </div>
+</div>

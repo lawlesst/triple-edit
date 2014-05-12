@@ -9,8 +9,8 @@ import requests
 
 from utils import JSONResponseMixin
 
-#from backend import SQLiteBackend
-#vstore =SQLiteBackend()
+# from backend import SQLiteBackend
+# vstore =SQLiteBackend()
 
 from backend import Vivo15Backend
 vstore = Vivo15Backend('http://localhost:8082/VIVO/query')
