@@ -8,6 +8,7 @@ import urllib
 import requests
 
 from utils import JSONResponseMixin, get_env
+from services import FASTService
 
 # from backend import SQLiteBackend
 # vstore =SQLiteBackend()
@@ -139,61 +140,30 @@ class PersonView(TemplateView, ResourceView):
         context['profile'] = profile
         return context
 
-class FASTTopicAutocompleteView(View, JSONResponseMixin):
+
+class FASTServiceView(View, JSONResponseMixin):
     def render_to_response(self, context):
         return JSONResponseMixin.render_to_response(self, context)
 
-    def make_uri(self, fast_id):
-        fast_uri_base = 'http://id.worldcat.org/fast/{0}'
-        fid = fast_id.lstrip('fst').lstrip('0')
-        fast_uri = fast_uri_base.format(fid)
-        return fast_uri
+class FASTTopicAutocompleteView(FASTServiceView):
 
     def get(self, request, *args, **kwargs):
-        #import ipdb; ipdb.set_trace()
-        api_base_url = 'http://fast.oclc.org/searchfast/fastsuggest'
+        fs = FASTService()
+        #topics
+        index = 'suggest50'
         context = {}
         query = self.request.GET.get('query')
-        #FAST topics are suggest50 - see http://experimental.worldcat.org/fast/assignfast/
-        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest50&queryReturn=idroot%2Cauth%2Ctype&suggest=autoSubject'
-        response = requests.get(url)
-        results = response.json()
-        #import ipdb; ipdb.set_trace()
-        out = []
-        for position, item in enumerate(results['response']['docs']):
-            if item.get('type') != u'auth':
-                continue
-            name = item.get('auth')
-            pid = item.get('idroot')
-            d = {}
-            d['uri'] = self.make_uri(pid)
-            d['id'] = pid
-            d['text'] = name
-            out.append(d)
+        out = fs.get(query, index)
         context['results'] = out
         return self.render_to_response(context)
 
-class FASTGeoAutocompleteView(FASTTopicAutocompleteView):
+class FASTGeoAutocompleteView(FASTServiceView):
     def get(self, request, *args, **kwargs):
-        #import ipdb; ipdb.set_trace()
-        api_base_url = 'http://fast.oclc.org/searchfast/fastsuggest'
+        fs = FASTService()
+        #topics
+        index = 'suggest51'
         context = {}
         query = self.request.GET.get('query')
-        #FAST topics are suggest50 - see http://experimental.worldcat.org/fast/assignfast/
-        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest51&queryReturn=idroot%2Cauth%2Ctype&suggest=autoSubject'
-        response = requests.get(url)
-        results = response.json()
-        #import ipdb; ipdb.set_trace()
-        out = []
-        for position, item in enumerate(results['response']['docs']):
-            if item.get('type') != u'auth':
-                continue
-            name = item.get('auth')
-            pid = item.get('idroot')
-            d = {}
-            d['uri'] = self.make_uri(pid)
-            d['id'] = pid
-            d['text'] = name
-            out.append(d)
+        out = fs.get(query, index)
         context['results'] = out
         return self.render_to_response(context)
