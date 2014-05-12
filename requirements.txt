@@ -1,10 +1,12 @@
+#Some requirements are there merely because this was setup using
+#Heroku's quickstart with the intention that people might want
+#to demo the application there.
 Django==1.6.4
 dj-database-url==0.3.0
 dj-static==0.0.5
 requests
-#gunicorn==18.0
-#psycopg2==2.5.2
 static==1.0.2
-#wsgiref==0.1.2
+#Only if you want to use an RDFLib database backend.
 git+https://github.com/RDFLib/rdflib-sqlalchemy.git
+#For writing to VIVO 1.5
 git+https://github.com/lawlesst/vivo-utils.git
