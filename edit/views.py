@@ -70,8 +70,26 @@ class UniversityView(TemplateView, ResourceView):
     template_name = 'university.html'
 
     def get_context_data(self, local_name=None, **kwargs):
-        context = super(UniversityView, self).get_context_data(**kwargs)
-        context['hello'] = "Here"
+        from backend import D, VIVO, RDFS
+        from display import university
+        context = {}
+        uri = D[local_name]
+        context['uri'] = uri
+        context['name'] = vstore.graph.value(subject=uri, predicate=RDFS.label)
+        profile = {
+            'overview': vstore.graph.value(subject=uri, predicate=VIVO.overview),
+        }
+        prepared_sections = []
+        for section in university:
+            if section['id'] == 'researchArea':
+                section['data'] = json.dumps(self.get_research_areas(uri))
+            elif section['id'] == 'geoResearchArea':
+                section['data'] = json.dumps(self.get_geo_research_areas(uri))
+            else:
+                section['data'] = profile.get(section['id'])
+            prepared_sections.append(section)
+        context['sections']  = prepared_sections
+        context['profile'] = profile
         return context
 
 class PersonView(TemplateView, ResourceView):

@@ -32,3 +32,11 @@ person = [
    #  'label': 'Geographic research areas / Places',
    # }
 ]
+university =[
+   {
+      'id':'overview',
+      'predicate':'vivo:overview',
+      'etype':'ckedit',
+      'label':'Overview'
+   },
+]
