@@ -22,17 +22,18 @@ class FASTService(object):
             '&queryReturn=idroot%2Cauth%2Ctype' + \
             '%2c{}'.format(index) + \
             '&suggest=autoSubject'
-        print url
         response = requests.get(url)
         results = response.json()
         out = []
         for position, item in enumerate(results['response']['docs']):
             rec_type = item.get('type')
-            if rec_type == u'auth':
-                name = item.get('auth')
-            else:
+            name = item.get('auth')
+            #For alternate terms whow the alternate label instead.
+            #ToDo: use Select2 display function to display and format
+            #the authorized form of the term.
+            if rec_type != u'auth':
                 try:
-                    name = item.get(index)[0]
+                    name = u'{}'.format(item.get(index)[0])
                 except IndexError:
                     continue
             pid = item.get('idroot')
