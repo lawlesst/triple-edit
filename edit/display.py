@@ -5,12 +5,12 @@ person = [
       'etype':'ckedit',
       'label':'Overview'
    },
-   # {
-   #    'id':'researchOverview',
-   #    'predicate':'vivo:researchOverview',
-   #    'etype':'ckedit',
-   #    'label':'Research overview'
-   # },
+   {
+      'id':'researchOverview',
+      'predicate':'vivo:researchOverview',
+      'etype':'ckedit',
+      'label':'Research overview'
+   },
    {
     'id': 'researchArea',
     'predicate': 'vivo:hasResearchArea',

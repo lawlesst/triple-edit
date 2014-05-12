@@ -7,7 +7,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title></title>
+        <title>triple editor</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -38,10 +38,8 @@
 
         <div class="main-container">
             <div class="main wrapper clearfix">
-
                 {% block content %}
                 {% endblock %}
-
             </div> <!-- #main -->
         </div> <!-- #main-container -->
 
@@ -60,6 +58,7 @@
           var GEO_SERVICE = "{% url 'edit:fast-geo' %}";
         </script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.6/select2.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.2/ckeditor.js"></script>
         {% block javascript %}
         {% endblock %}
         <script src="{% static "js/main.js" %}"></script>
