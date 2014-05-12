@@ -1,1 +1,1 @@
-web: gunicorn tripswrite.wsgi
+web: gunicorn demo.wsgi
