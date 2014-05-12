@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 
+import os
 import json
 
 
@@ -35,3 +36,9 @@ class JSONResponseMixin(object):
         #     except KeyError, TypeError:
         #         pass
         return json.dumps(context)
+
+def get_env(key):
+    try:
+        return os.environ[key]
+    except KeyError:
+        raise Exception("Required environment variable not found: {}.".format(key))

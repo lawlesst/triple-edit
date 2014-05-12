@@ -38,6 +38,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
+.env
 *.log
 staticfiles
 *.db

@@ -7,13 +7,14 @@ import urllib
 
 import requests
 
-from utils import JSONResponseMixin
+from utils import JSONResponseMixin, get_env
 
 # from backend import SQLiteBackend
 # vstore =SQLiteBackend()
 
 from backend import Vivo15Backend
-vstore = Vivo15Backend('http://localhost:8082/VIVO/query')
+ep = get_env('ENDPOINT')
+vstore = Vivo15Backend(ep)
 
 class ResourceView(View):
 

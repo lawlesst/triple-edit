@@ -8,11 +8,16 @@ from rdflib.query import ResultException
 
 import uuid
 
+from utils import get_env
+
 #setup namespaces
 #code inspired by / borrowed from https://github.com/libris/librislod
 VIVO = Namespace('http://vivoweb.org/ontology/core#')
 #local data namespace
-D = Namespace('http://vivo.brown.edu/individual/')
+d = get_env('NAMESPACE')
+D = Namespace(d)
+
+#For demo purposes.
 BLOCAL = Namespace('http://demo.school.edu/ontology/')
 
 namespaces = {}
@@ -148,7 +153,7 @@ class Vivo15Backend(BaseBackend):
         by SPARQL update when that is available via
         a VIVO web service.
         """
-        VIVO_URL = os.environ['VIVO_URL']
+        vivo_url = get_env('VIVO_URL')
         vs = self.get_session()
         if (len(add_graph) == 0) and (len(subtract_graph) == 0):
             logging.info('Add and subtract graph are both empty.  Not submitting edit.')
@@ -162,7 +167,7 @@ class Vivo15Backend(BaseBackend):
             retractions=subtract_graph.serialize(format='n3'),
         )
         resp = vs.session.post(
-            VIVO_URL + 'edit/primitiveRdfEdit',
+            vivo_url + 'edit/primitiveRdfEdit',
             data=payload,
             verify=False
         )

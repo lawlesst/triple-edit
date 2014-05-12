@@ -1,0 +1,10 @@
+#Copy this to .env and replace with your system configuration.
+#SPARQL query url
+ENDPOINT=http://localhost:8082/DB/query
+#Used as the subject uri for new triples
+NAMESPACE=http://localhost/individual/
+
+#Only necessary if writing to VIVO
+VIVO_URL=http://localhost:8080/vivo
+VIVO_USER=vivo_root@school.edu
+VIVO_PASSWORD=password
