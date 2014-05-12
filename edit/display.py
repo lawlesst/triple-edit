@@ -5,12 +5,12 @@ person = [
       'etype':'ckedit',
       'label':'Overview'
    },
-   {
-      'id':'researchOverview',
-      'predicate':'vivo:researchOverview',
-      'etype':'ckedit',
-      'label':'Research overview'
-   },
+   # {
+   #    'id':'researchOverview',
+   #    'predicate':'vivo:researchOverview',
+   #    'etype':'ckedit',
+   #    'label':'Research overview'
+   # },
    {
     'id': 'researchArea',
     'predicate': 'vivo:hasResearchArea',
@@ -18,11 +18,17 @@ person = [
     'range': 'vivo:ResearchArea',
     'label': 'Research areas',
    },
-   {
-    'id': 'geoResearchArea',
-    'predicate': 'blocal:hasGeographicResearchArea',
-    'etype': 'multi-tag',
-    'range': 'blocal:GeographicLocation',
-    'label': 'Geographic research areas / Places',
-   }
+   # {
+   #    'id':'teachingOverview',
+   #    'predicate':'vivo:teachingOverview',
+   #    'etype':'ckedit',
+   #    'label':'Teaching overview'
+   # },
+   # {
+   #  'id': 'geoResearchArea',
+   #  'predicate': 'blocal:hasGeographicResearchArea',
+   #  'etype': 'multi-tag',
+   #  'range': 'blocal:GeographicLocation',
+   #  'label': 'Geographic research areas / Places',
+   # }
 ]

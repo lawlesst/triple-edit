@@ -1,8 +1,10 @@
 Django==1.6.4
 dj-database-url==0.3.0
 dj-static==0.0.5
-gunicorn==18.0
-psycopg2==2.5.2
+requests
+#gunicorn==18.0
+#psycopg2==2.5.2
 static==1.0.2
-wsgiref==0.1.2
-git+https://github.com/RDFLib/rdflib-sqlchemy.git
+#wsgiref==0.1.2
+git+https://github.com/RDFLib/rdflib-sqlalchemy.git
+git+https://github.com/lawlesst/vivo-utils.git

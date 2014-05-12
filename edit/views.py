@@ -1,31 +1,39 @@
-from django.conf import settings
 
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseServerError
 from django.views.generic import TemplateView, View
 
 import json
+import urllib
+
+import requests
 
 from utils import JSONResponseMixin
+
+#from backend import SQLiteBackend
+#vstore =SQLiteBackend()
+
+from backend import Vivo15Backend
+vstore = Vivo15Backend('http://localhost:8082/VIVO/query')
 
 class ResourceView(View):
 
     def post(self, *args, **kwargs):
-        import backend
-        from backend import vstore, make_edit_graph, get_subtract_graph, add_remove, VIVO
+        #from backend import vstore, make_edit_graph, get_subtract_graph, add_remove, VIVO
         from rdflib import Graph, RDFS, URIRef, Literal
         posted = self.request.POST
         #import pdb; pdb.set_trace()
         edit = json.loads(posted.get('edit'))
         if edit.get('type') == 'ck':
+            #import ipdb; ipdb.set_trace();
             add_stmts = edit['add']
-            add_g = make_edit_graph(add_stmts)
-            subtract_g = get_subtract_graph(add_stmts)
+            add_g = vstore.make_edit_graph(add_stmts)
+            subtract_g = vstore.get_subtract_graph(add_stmts)
         elif edit.get('type') in [u'multi-tag']:
             add_stmts = edit.get('add')
             if (add_stmts is not None) and (add_stmts != {}):
                 add_g = Graph()
                 if add_stmts['object'] == u'new':
-                    uri, g = backend.create_resource(
+                    uri, g = vstore.create_resource(
                         add_stmts['range'],
                         add_stmts['text']
                     )
@@ -35,18 +43,18 @@ class ResourceView(View):
                     #Make sure we have the text for the added KW
                     obj_uri = URIRef(add_stmts['object'])
                     add_g.add((obj_uri, RDFS.label, Literal(add_stmts['text'])))
-                add_g += make_edit_graph(add_stmts)
+                add_g += vstore.make_edit_graph(add_stmts)
             else:
                 add_g = Graph()
             remove_stmts = edit.get('subtract')
             if remove_stmts is not None:
-                subtract_g = make_edit_graph(remove_stmts)
+                subtract_g = vstore.make_edit_graph(remove_stmts)
             else:
                 subtract_g = Graph()
         else:
             return HttpResponseServerError("Edit failed.  Edit type not recognized.")
 
-        done = add_remove(add_g, subtract_g)
+        done = vstore.add_remove(add_g, subtract_g)
         if done is True:
             return HttpResponse('', 200 )
         else:
@@ -68,7 +76,6 @@ class PersonView(TemplateView, ResourceView):
     template_name = 'person.html'
 
     def get_research_areas(self, uri):
-        from backend import vstore
         rq = """
         select ?ra ?label
         where {
@@ -77,7 +84,7 @@ class PersonView(TemplateView, ResourceView):
         }
         """
         out = []
-        for row in vstore.query(rq, initBindings={'uri': uri}):
+        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
             d = {}
             d['uri'] = row.ra.toPython()
             d['id'] = d['uri']
@@ -86,7 +93,6 @@ class PersonView(TemplateView, ResourceView):
         return out
 
     def get_geo_research_areas(self, uri):
-        from backend import vstore
         rq = """
         select ?ra ?label
         where {
@@ -95,7 +101,7 @@ class PersonView(TemplateView, ResourceView):
         }
         """
         out = []
-        for row in vstore.query(rq, initBindings={'uri': uri}):
+        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
             d = {}
             d['uri'] = row.ra.toPython()
             d['id'] = d['uri']
@@ -104,17 +110,19 @@ class PersonView(TemplateView, ResourceView):
         return out
 
     def get_context_data(self, local_name=None, **kwargs):
-        from backend import D, VIVO, vstore, RDFS
+        from backend import D, VIVO, RDFS
         from display import person
         context = super(PersonView, self).get_context_data(**kwargs)
         uri = D[local_name]
         context['uri'] = uri
-        context['name'] = vstore.value(subject=uri, predicate=RDFS.label)
+        context['name'] = vstore.graph.value(subject=uri, predicate=RDFS.label)
         context['sections'] = person
         #This will come from a sparql query.
         profile = {
-            'overview': vstore.value(subject=uri, predicate=VIVO.overview),
-            'researchOverview': vstore.value(subject=uri, predicate=VIVO.researchOverview)
+            'title': vstore.graph.value(subject=uri, predicate=VIVO.preferredTitle),
+            'overview': vstore.graph.value(subject=uri, predicate=VIVO.overview),
+            'researchOverview': vstore.graph.value(subject=uri, predicate=VIVO.researchOverview),
+            'teachingOverview': vstore.graph.value(subject=uri, predicate=VIVO.teachingOverview)
         }
         prepared_sections = []
         for section in person:
@@ -127,6 +135,7 @@ class PersonView(TemplateView, ResourceView):
             prepared_sections.append(section)
             #get the v
         context['sections']  = prepared_sections
+        context['profile'] = profile
         return context
 
 class FASTTopicAutocompleteView(View, JSONResponseMixin):
@@ -140,8 +149,6 @@ class FASTTopicAutocompleteView(View, JSONResponseMixin):
         return fast_uri
 
     def get(self, request, *args, **kwargs):
-        import requests
-        import urllib
         #import ipdb; ipdb.set_trace()
         api_base_url = 'http://fast.oclc.org/searchfast/fastsuggest'
         context = {}
@@ -167,8 +174,6 @@ class FASTTopicAutocompleteView(View, JSONResponseMixin):
 
 class FASTGeoAutocompleteView(FASTTopicAutocompleteView):
     def get(self, request, *args, **kwargs):
-        import requests
-        import urllib
         #import ipdb; ipdb.set_trace()
         api_base_url = 'http://fast.oclc.org/searchfast/fastsuggest'
         context = {}
