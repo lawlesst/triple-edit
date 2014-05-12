@@ -10,8 +10,9 @@ from utils import JSONResponseMixin
 class ResourceView(View):
 
     def post(self, *args, **kwargs):
-        from backend import vstore, make_edit_graph, get_subtract_graph, add_remove
-        from rdflib import Graph
+        import backend
+        from backend import vstore, make_edit_graph, get_subtract_graph, add_remove, VIVO
+        from rdflib import Graph, RDFS, URIRef, Literal
         posted = self.request.POST
         #import pdb; pdb.set_trace()
         edit = json.loads(posted.get('edit'))
@@ -21,8 +22,20 @@ class ResourceView(View):
             subtract_g = get_subtract_graph(add_stmts)
         elif edit.get('type') in [u'multi-tag']:
             add_stmts = edit.get('add')
-            if add_stmts is not None:
-                add_g = make_edit_graph(add_stmts)
+            if (add_stmts is not None) and (add_stmts != {}):
+                add_g = Graph()
+                if add_stmts['object'] == u'new':
+                    uri, g = backend.create_resource(
+                        add_stmts['range'],
+                        add_stmts['text']
+                    )
+                    add_g += g
+                    add_stmts['object'] = uri
+                else:
+                    #Make sure we have the text for the added KW
+                    obj_uri = URIRef(add_stmts['object'])
+                    add_g.add((obj_uri, RDFS.label, Literal(add_stmts['text'])))
+                add_g += make_edit_graph(add_stmts)
             else:
                 add_g = Graph()
             remove_stmts = edit.get('subtract')
@@ -33,6 +46,8 @@ class ResourceView(View):
         else:
             return HttpResponseServerError("Edit failed.  Edit type not recognized.")
 
+        print add_g.serialize(format='n3')
+        print subtract_g.serialize(format='n3')
         done = add_remove(add_g, subtract_g)
         if done is True:
             return HttpResponse('', 200 )
@@ -54,6 +69,42 @@ class UniversityView(TemplateView, ResourceView):
 class PersonView(TemplateView, ResourceView):
     template_name = 'person.html'
 
+    def get_research_areas(self, uri):
+        from backend import vstore
+        rq = """
+        select ?ra ?label
+        where {
+            ?uri vivo:hasResearchArea ?ra .
+            ?ra rdfs:label ?label .
+        }
+        """
+        out = []
+        for row in vstore.query(rq, initBindings={'uri': uri}):
+            d = {}
+            d['uri'] = row.ra.toPython()
+            d['id'] = d['uri']
+            d['text'] = row.label.toPython()
+            out.append(d)
+        return out
+
+    def get_geo_research_areas(self, uri):
+        from backend import vstore
+        rq = """
+        select ?ra ?label
+        where {
+            ?uri blocal:hasGeographicResearchArea ?ra .
+            ?ra rdfs:label ?label .
+        }
+        """
+        out = []
+        for row in vstore.query(rq, initBindings={'uri': uri}):
+            d = {}
+            d['uri'] = row.ra.toPython()
+            d['id'] = d['uri']
+            d['text'] = row.label.toPython()
+            out.append(d)
+        return out
+
     def get_context_data(self, local_name=None, **kwargs):
         from backend import D, VIVO, vstore
         from display import person
@@ -66,13 +117,14 @@ class PersonView(TemplateView, ResourceView):
         #This will come from a sparql query.
         profile = {
             'overview': vstore.value(subject=uri, predicate=VIVO.overview),
-            'research-overview': vstore.value(subject=uri, predicate=VIVO.researchOverview)
+            'researchOverview': vstore.value(subject=uri, predicate=VIVO.researchOverview)
         }
         prepared_sections = []
         for section in person:
-            print section['id'], section['predicate']
-            if section['id'] == 'research-area':
-                section['data'] = ['crime', 'history', 'BBC']
+            if section['id'] == 'researchArea':
+                section['data'] = json.dumps(self.get_research_areas(uri))
+            elif section['id'] == 'geoResearchArea':
+                section['data'] = json.dumps(self.get_geo_research_areas(uri))
             else:
                 section['data'] = profile.get(section['id'])
             prepared_sections.append(section)
@@ -95,10 +147,10 @@ class FASTTopicAutocompleteView(View, JSONResponseMixin):
         import urllib
         #import ipdb; ipdb.set_trace()
         api_base_url = 'http://fast.oclc.org/searchfast/fastsuggest'
-        #http://localhost:8080/vivo/autocomplete?tokenize=true&term=crime&type=http%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23Concept&multipleTypes=null
         context = {}
         query = self.request.GET.get('query')
-        url = api_base_url + '?query=' + urllib.quote(query) + '&rows=30&queryReturn=suggestall%2Cidroot%2Cauth%2cscore&suggest=autoSubject&queryIndex=suggest10&wt=json'
+        #FAST topics are suggest50 - see http://experimental.worldcat.org/fast/assignfast/
+        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest50&queryReturn=idroot%2Cauth&suggest=autoSubject'
         response = requests.get(url)
         results = response.json()
         #import ipdb; ipdb.set_trace()
@@ -114,3 +166,27 @@ class FASTTopicAutocompleteView(View, JSONResponseMixin):
         context['results'] = out
         return self.render_to_response(context)
 
+class FASTGeoAutocompleteView(FASTTopicAutocompleteView):
+    def get(self, request, *args, **kwargs):
+        import requests
+        import urllib
+        #import ipdb; ipdb.set_trace()
+        api_base_url = 'http://fast.oclc.org/searchfast/fastsuggest'
+        context = {}
+        query = self.request.GET.get('query')
+        #FAST topics are suggest50 - see http://experimental.worldcat.org/fast/assignfast/
+        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest51&queryReturn=idroot%2Cauth&suggest=autoSubject'
+        response = requests.get(url)
+        results = response.json()
+        #import ipdb; ipdb.set_trace()
+        out = []
+        for position, item in enumerate(results['response']['docs']):
+            name = item.get('auth')
+            pid = item.get('idroot')
+            d = {}
+            d['uri'] = self.make_uri(pid)
+            d['id'] = pid
+            d['text'] = name
+            out.append(d)
+        context['results'] = out
+        return self.render_to_response(context)

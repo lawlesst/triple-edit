@@ -74,53 +74,57 @@ function ckPropertyEdit(elem, text) {
 function setupMultiTag() {
     var mt = $('.multitag');
     $.each(mt, function(index, elem){
-        console.debug($(elem).data('range'), $(elem).data('predicate'));
         var s = '#' + elem.getAttribute('id');
         var range = $(elem).data('range');
-        var uri = $(elem).data('uri')
+        var uri = $(elem).data('subject')
+        var prop = $(elem).data('predicate')
         if (range == 'vivo:ResearchArea') {
-            var endpoint = KEYWORD_SERVICE
+            var endpoint = KEYWORD_SERVICE;
+        } else if (range == 'blocal:GeographicLocation') {
+            var endpoint = GEO_SERVICE;
         }
         setAutocomplete(s, 'skos:Concept', true, true, endpoint);
-        $(s).select2('data', [{'id': '1', 'text': 'crime'}]);
+        $(s).select2('data', window[elem.getAttribute('id') + 'InitData'] || []);
         $(s).on("change", function(e) {
-              console.debug("change "+JSON.stringify({val:e.val, added:e.added, removed:e.removed}));
-              // if ( e.added != undefined ){
-              //   var d = {}
-              //   d['subject'] = uri;
-              //   d['predicate'] = $(this).data('predicate');
-              //   d['object'] = e.added.uri;
-              //   d['text'] = e.added.text;
-              //   d['range'] = $(this).data('range');
-              //   var primitiveEdit = {
-              //     add: d,
-              //     subtract: {},
-              //     type: 'multi-tag'
-              //   };
-              //   doUpdate(
-              //       {
-              //           'edit': JSON.stringify(primitiveEdit),
-              //       }
-              //   )
-              // };
+              //console.debug("change "+JSON.stringify({val:e.val, added:e.added, removed:e.removed}));
+              if ( e.added != undefined ){
+                var d = {}
+                d['subject'] = uri;
+                d['predicate'] = prop;
+                d['object'] = e.added.uri;
+                d['text'] = e.added.text;
+                d['range'] = range;
+                var primitiveEdit = {
+                  add: d,
+                  subtract: {},
+                  type: 'multi-tag'
+                };
+                //console.debug(d);
+                doUpdate(
+                    {
+                        'edit': JSON.stringify(primitiveEdit),
+                    }
+                )
+              };
 
-              // if ( e.removed != undefined ){
-              //   var d = {}
-              //   d['subject'] = uri;
-              //   d['predicate'] = $(this).data('predicate');
-              //   d['object'] = e.removed.id;
-              //   d['text'] = e.removed.text;
-              //   var primitiveEdit = {
-              //     add: {},
-              //     subtract: d,
-              //     type: 'multi-tag'
-              //   };
-              //   doUpdate(
-              //       {
-              //           'edit': JSON.stringify(primitiveEdit),
-              //       }
-              //   )
-              // };
+              if ( e.removed != undefined ){
+                var d = {}
+                d['subject'] = uri;
+                d['predicate'] = prop;
+                d['object'] = e.removed.uri;
+                //not really necessary.
+                d['text'] = e.removed.text;
+                var primitiveEdit = {
+                  add: {},
+                  subtract: d,
+                  type: 'multi-tag'
+                };
+                doUpdate(
+                    {
+                        'edit': JSON.stringify(primitiveEdit),
+                    }
+                )
+              };
         });
     });
 };
@@ -134,6 +138,10 @@ function doUpdate(params) {
       });
 };
 
+//
+// This needs to be reworked since we are query services too instead
+// of just VIVO.  The endpoint will hide many of the details.
+//
 function setAutocomplete(cssId, vClass, multiple, create, endpoint) {
       $(cssId).select2({
           minimumInputLength: 3,
@@ -164,7 +172,7 @@ function setAutocomplete(cssId, vClass, multiple, create, endpoint) {
           },
           createSearchChoice: function(item) {
             if (create == true) {
-              return {id: 'new', text: item};
+              return {id: 'new', text: item, uri: 'new'};
             } else {
               return;
             };

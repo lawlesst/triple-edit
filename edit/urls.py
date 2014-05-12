@@ -4,7 +4,8 @@ from views import (
     ResourceView,
     PersonView,
     UniversityView,
-    FASTTopicAutocompleteView
+    FASTTopicAutocompleteView,
+    FASTGeoAutocompleteView
 )
 
 
@@ -13,4 +14,5 @@ urlpatterns = patterns('',
     url(r'^org/display/(?P<local_name>[a-z0-9]+)/$', UniversityView.as_view(), name='university'),
     url(r'^edit/', ResourceView.as_view(), name='edit'),
     url(r'^service/fast/topic/$', FASTTopicAutocompleteView.as_view(), name='fast-topic'),
+    url(r'^service/fast/geo/$', FASTGeoAutocompleteView.as_view(), name='fast-geo'),
 )

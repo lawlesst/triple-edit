@@ -21,7 +21,12 @@
       {% elif section.etype == "multi-tag" %}
           <div>
             <p>
-              <input type="hidden" class="multitag" id="{{ section.id }}" data-predicate="vivo:hasResearchArea" data-range="vivo:ResearchArea" style="width:500px;"/>
+              <input type="hidden" class="multitag" id="{{ section.id }}" data-subject="{{ uri }}" data-predicate="{{ section.predicate }}" data-range="{{ section.range }}" style="width:500px;"/>
+              {% if section.data %}
+                <script>
+                  var {{ section.id}}InitData = {{ section.data|safe}};
+                </script>
+              {% endif %}
             </p>
           </div>
       {% endif %}
@@ -34,13 +39,4 @@
 
 {% block javascript %}
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.2/ckeditor.js"></script>
-
-<script>
-   $(document).ready(function () {
-      //$(".multi-tag").select2({tags:["red", "green", "blue"]});
-      //.each('multi-tag', function(index, value){
-      //  $(value);
-      //});
-    });
-</script>
 {% endblock %}
