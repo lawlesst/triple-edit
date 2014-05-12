@@ -22,19 +22,13 @@ class JSONResponseMixin(object):
 
     def convert_context_to_json(self, context):
         """
-        Fix this if there is a need to serializing more
+        Dumps the context as JSON.
+
+        Improve if there is a need to serialize more
         complex objects.
+
+        See: https://docs.djangoproject.com/en/dev/topics/serialization/
         """
-        #"Convert the context dictionary into a JSON object"
-        # Note: this needs to be better to ensure that you are seralizing what
-        # is needed as JSON.  For now just popping known problems.
-        #Also see - https://docs.djangoproject.com/en/dev/topics/serialization/
-        # remove = ['user', 'resource', 'profile']
-        # for rem in remove:
-        #     try:
-        #         del context[rem]
-        #     except KeyError, TypeError:
-        #         pass
         return json.dumps(context)
 
 def get_env(key):

@@ -3,9 +3,6 @@ from django.http import HttpResponse, HttpResponseServerError
 from django.views.generic import TemplateView, View
 
 import json
-import urllib
-
-import requests
 
 from utils import JSONResponseMixin, get_env
 from services import FASTService
@@ -13,6 +10,7 @@ from services import FASTService
 # from backend import SQLiteBackend
 # vstore =SQLiteBackend()
 
+#A VIVO 15 Backend.
 from backend import Vivo15Backend
 ep = get_env('ENDPOINT')
 vstore = Vivo15Backend(ep)
@@ -92,6 +90,7 @@ class UniversityView(TemplateView, ResourceView):
         context['profile'] = profile
         return context
 
+
 class PersonView(TemplateView, ResourceView):
     template_name = 'person.html'
 
@@ -136,8 +135,8 @@ class PersonView(TemplateView, ResourceView):
         uri = D[local_name]
         context['uri'] = uri
         context['name'] = vstore.graph.value(subject=uri, predicate=RDFS.label)
-        context['sections'] = person
-        #This will come from a sparql query.
+        #In production, this will neeed to be refactored because each call
+        #to graph generates a SPARQL query.
         profile = {
             'title': vstore.graph.value(subject=uri, predicate=VIVO.preferredTitle),
             'overview': vstore.graph.value(subject=uri, predicate=VIVO.overview),
@@ -153,11 +152,14 @@ class PersonView(TemplateView, ResourceView):
             else:
                 section['data'] = profile.get(section['id'])
             prepared_sections.append(section)
-            #get the v
         context['sections']  = prepared_sections
         context['profile'] = profile
         return context
 
+
+#
+# - Services for autcomplete widgets
+#
 
 class FASTServiceView(View, JSONResponseMixin):
     def render_to_response(self, context):
@@ -178,7 +180,7 @@ class FASTTopicAutocompleteView(FASTServiceView):
 class FASTGeoAutocompleteView(FASTServiceView):
     def get(self, request, *args, **kwargs):
         fs = FASTService()
-        #topics
+        #locations/geograph
         index = 'suggest51'
         context = {}
         query = self.request.GET.get('query')

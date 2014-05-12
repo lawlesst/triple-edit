@@ -121,7 +121,6 @@ class BaseBackend(object):
 
 class Vivo15Backend(BaseBackend):
     def __init__(self, endpoint):
-        #super(Vivo15Backend).__init__(self, endpoint)
         graph = ConjunctiveGraph('SPARQLStore')
         graph.open(endpoint)
         graph.namespace_manager=ns_mgr
