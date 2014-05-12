@@ -38,7 +38,7 @@ for (var i=0;i<divs.length;i++) {
                         };
                         var box = $('#' + event.sender.name);
                         //show the save button
-                        $(box).next().show();
+                        $(box).next('.ck-save').show();
                       }
                   },
                   toolbar: [
@@ -62,10 +62,10 @@ function ckPropertyEdit(elem, text) {
     };
   console.debug(data);
   var jqxhr = $.post(EDIT_ENDPOINT, {'edit': JSON.stringify(data)}, function(returned){
-        $('.ck-save').remove();
+        $('.ck-save').hide();
   })
     .fail(function() {
-      $('.ck-save').remove();
+      $('.ck-save').hide();
       alert("Editing failed to finish.");
   });
 };
