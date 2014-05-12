@@ -46,8 +46,6 @@ class ResourceView(View):
         else:
             return HttpResponseServerError("Edit failed.  Edit type not recognized.")
 
-        print add_g.serialize(format='n3')
-        print subtract_g.serialize(format='n3')
         done = add_remove(add_g, subtract_g)
         if done is True:
             return HttpResponse('', 200 )
@@ -150,12 +148,14 @@ class FASTTopicAutocompleteView(View, JSONResponseMixin):
         context = {}
         query = self.request.GET.get('query')
         #FAST topics are suggest50 - see http://experimental.worldcat.org/fast/assignfast/
-        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest50&queryReturn=idroot%2Cauth&suggest=autoSubject'
+        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest50&queryReturn=idroot%2Cauth%2Ctype&suggest=autoSubject'
         response = requests.get(url)
         results = response.json()
         #import ipdb; ipdb.set_trace()
         out = []
         for position, item in enumerate(results['response']['docs']):
+            if item.get('type') != u'auth':
+                continue
             name = item.get('auth')
             pid = item.get('idroot')
             d = {}
@@ -175,12 +175,14 @@ class FASTGeoAutocompleteView(FASTTopicAutocompleteView):
         context = {}
         query = self.request.GET.get('query')
         #FAST topics are suggest50 - see http://experimental.worldcat.org/fast/assignfast/
-        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest51&queryReturn=idroot%2Cauth&suggest=autoSubject'
+        url = api_base_url + '?query=' + urllib.quote(query) + '&queryIndex=suggest51&queryReturn=idroot%2Cauth%2Ctype&suggest=autoSubject'
         response = requests.get(url)
         results = response.json()
         #import ipdb; ipdb.set_trace()
         out = []
         for position, item in enumerate(results['response']['docs']):
+            if item.get('type') != u'auth':
+                continue
             name = item.get('auth')
             pid = item.get('idroot')
             d = {}
