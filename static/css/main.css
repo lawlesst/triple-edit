@@ -1,0 +1,35 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+
+.ck-save {
+    display: none;
+}
+i.ajax-spinner  {
+    display: none;
+}
+
+.ckedit {
+    padding: 2em;
+    background-color: #DBE0E6;
+    border: 2px solid;
+    border-radius: 10px;
+    width: 50%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

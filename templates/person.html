@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <h1>Person</h1>
+    {% for section in sections %}
+      <h3>{{ section.label }}</h3>
+      {% if section.etype == "ckedit" %}
+        <div id="{{ section.id }}" data-subject="{{ uri }}" data-predicate="{{ section.predicate }}" class="ckedit well" contenteditable="true">
+              {% if section.data %}
+                {{ section.data|safe }}
+              {% else %}
+                Click here to add a {{ section.label|lower }}.
+              {% endif %}
+        </div>
+        <div class="ck-save">
+            <div class="btn-group">
+              <button class="btn">Save</button>
+            </div>
+        </div>
+      {% elif section.etype == "multi-tag" %}
+          <div>
+            <p>
+              <input type="hidden" class="multitag" id="{{ section.id }}" data-predicate="vivo:hasResearchArea" data-range="vivo:ResearchArea" style="width:500px;"/>
+            </p>
+          </div>
+      {% endif %}
+      <hr/>
+    {% endfor %}
+</div>
+
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.2/ckeditor.js"></script>
+
+<script>
+   $(document).ready(function () {
+      //$(".multi-tag").select2({tags:["red", "green", "blue"]});
+      //.each('multi-tag', function(index, value){
+      //  $(value);
+      //});
+    });
+</script>
+{% endblock %}

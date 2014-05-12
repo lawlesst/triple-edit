@@ -5,3 +5,4 @@ gunicorn==18.0
 psycopg2==2.5.2
 static==1.0.2
 wsgiref==0.1.2
+git+https://github.com/RDFLib/rdflib-sqlchemy.git
