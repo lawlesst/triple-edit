@@ -5,12 +5,12 @@ person = [
       'etype':'ckedit',
       'label':'Overview'
    },
-   # {
-   #    'id':'researchOverview',
-   #    'predicate':'vivo:researchOverview',
-   #    'etype':'ckedit',
-   #    'label':'Research overview'
-   # },
+   {
+      'id':'researchOverview',
+      'predicate':'vivo:researchOverview',
+      'etype':'ckedit',
+      'label':'Research overview'
+   },
    {
     'id': 'researchArea',
     'predicate': 'vivo:hasResearchArea',
@@ -31,4 +31,12 @@ person = [
    #  'range': 'blocal:GeographicLocation',
    #  'label': 'Geographic research areas / Places',
    # }
+]
+university =[
+   {
+      'id':'overview',
+      'predicate':'vivo:overview',
+      'etype':'ckedit',
+      'label':'Overview'
+   },
 ]

@@ -2,8 +2,21 @@
 
 {% block content %}
 <div class="row">
-    <h1>Univ</h1>
-    {{ hello }}
+    <h2> {{ name }}</h2>
+    {% for section in sections %}
+      <h3>{{ section.label }}</h3>
+      {% if section.etype == "ckedit" %}
+        {% include "snippets/ckedit.html" %}
+      {% elif section.etype == "multi-tag" %}
+          {% include "snippets/multi-tag.html" %}
+      {% endif %}
+      <hr/>
+    {% endfor %}
 </div>
 
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.2/ckeditor.js"></script>
 {% endblock %}
