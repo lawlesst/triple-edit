@@ -11,9 +11,9 @@ from services import FASTService
 # vstore =SQLiteBackend()
 
 #A VIVO 15 Backend.
-from backend import Vivo15Backend
+from backend import Vivo16Backend
 ep = get_env('ENDPOINT')
-vstore = Vivo15Backend(ep)
+vstore = Vivo16Backend(ep)
 
 class ResourceView(View):
 

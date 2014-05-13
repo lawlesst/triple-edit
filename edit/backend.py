@@ -5,6 +5,7 @@ from rdflib import plugin, Graph, ConjunctiveGraph, Literal, URIRef, Namespace, 
 from rdflib.store import Store
 from rdflib.namespace import NamespaceManager, ClosedNamespace
 from rdflib.query import ResultException
+from SPARQLWrapper import SPARQLWrapper
 
 import uuid
 
@@ -117,6 +118,55 @@ class BaseBackend(object):
 
     def add_remove(self, *args):
         raise NotImplementedError("Add and remove not defined.")
+
+class Vivo16Backend(BaseBackend):
+
+    def __init__(self, endpoint):
+        graph = ConjunctiveGraph('SPARQLStore')
+        graph.open(endpoint)
+        graph.namespace_manager=ns_mgr
+        self.graph = graph
+        self.default_graph = 'http://vitro.mannlib.cornell.edu/default/vitro-kb-2'
+
+    def do_update(self, query):
+        logging.debug(query)
+        update_url = get_env('VIVO_URL') + '/api/sparqlUpdate'
+        print update_url
+        sparql = SPARQLWrapper(update_url)
+        sparql.addParameter('email', get_env('VIVO_USER'))
+        sparql.addParameter('password', get_env('VIVO_PASSWORD'))
+        sparql.method = 'POST'
+        sparql.setQuery(query)
+        results = sparql.query()
+        return results
+
+    def build_clause(self, change_graph, name=None, delete=False):
+        nameg = name or self.default_graph
+        stmts = u''
+        for subject, predicate, obj in change_graph:
+            triple = "%s %s %s .\n" % (subject.n3(), predicate.n3(), obj.n3())
+            stmts += triple
+        if delete is False:
+            return u"INSERT DATA { GRAPH <%s> { %s } }" % (nameg, stmts)
+        else:
+            return u"DELETE DATA { GRAPH <%s> { %s } }" % (nameg, stmts)
+
+    def add_remove(self, add_g, subtract_g, name=None):
+        #DELETE { GRAPH <g1> { a b c } } INSERT { GRAPH <g1> { x y z } }
+        #http://www.w3.org/TR/sparql11-update/#deleteInsert
+        #return self.primitive_edit(add_g, subtract_g)
+        rq = u''
+        add_size = len(add_g)
+        remove_size = len(subtract_g)
+        if (add_size == 0) and (remove_size == 0):
+            logging.info("Graphs empty.  No edit made.")
+        if add_size != 0:
+            rq += self.build_clause(add_g, name=name)
+        if remove_size != 0:
+            rq += u' ' + self.build_clause(subtract_g, name=name, delete=True)
+        logging.debug("SPARQL Update Query:\n".format(rq))
+        self.do_update(rq)
+        return True
 
 
 class Vivo15Backend(BaseBackend):
