@@ -5,12 +5,12 @@ person = [
       'etype':'ckedit',
       'label':'Overview'
    },
-   {
-      'id':'researchOverview',
-      'predicate':'vivo:researchOverview',
-      'etype':'ckedit',
-      'label':'Research overview'
-   },
+   # {
+   #    'id':'researchOverview',
+   #    'predicate':'vivo:researchOverview',
+   #    'etype':'ckedit',
+   #    'label':'Research overview'
+   # },
    {
     'id': 'researchArea',
     'predicate': 'vivo:hasResearchArea',
@@ -31,13 +31,13 @@ person = [
    #  'range': 'schema:Place',
    #  'label': 'Geographic research areas',
    # },
-   {
-    'id': 'affiliations',
-    'predicate': 'schema:affiliation',
-    'etype': 'multi-tag',
-    'range': 'schema:Organization',
-    'label': 'Affiliated organizations',
-   }
+   # {
+   #  'id': 'affiliations',
+   #  'predicate': 'schema:affiliation',
+   #  'etype': 'multi-tag',
+   #  'range': 'schema:Organization',
+   #  'label': 'Affiliated organizations',
+   # }
 ]
 
 university =[
