@@ -13,12 +13,12 @@ from utils import get_env
 #setup namespaces
 #code inspired by / borrowed from https://github.com/libris/librislod
 VIVO = Namespace('http://vivoweb.org/ontology/core#')
+SCHEMA = Namespace('http://schema.org/')
+FOAF = Namespace('http://xmlns.com/foaf/0.1/')
+
 #local data namespace
 d = get_env('NAMESPACE')
 D = Namespace(d)
-
-#For demo purposes.
-BLOCAL = Namespace('http://demo.school.edu/ontology/')
 
 namespaces = {}
 for k, o in vars().items():
@@ -166,7 +166,7 @@ class Vivo15Backend(BaseBackend):
             retractions=subtract_graph.serialize(format='n3'),
         )
         resp = vs.session.post(
-            vivo_url + 'edit/primitiveRdfEdit',
+            vivo_url + '/edit/primitiveRdfEdit',
             data=payload,
             verify=False
         )
