@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <h2> {{ name }}</h2>
+    {% for section in sections %}
+      <h3>{{ section.label }}</h3>
+        <div>
+          {% if section.data %}
+            <ul>
+            {% for obj in section.data %}
+              <li id="{{ obj.id }}"><a href="{{ obj.uri }}">{{ obj.text|safe }}</a></li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      <hr/>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

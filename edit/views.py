@@ -91,6 +91,60 @@ class UniversityView(TemplateView, ResourceView):
         context['profile'] = profile
         return context
 
+class IndexView(TemplateView, ResourceView):
+    template_name = 'index.html'
+
+    def get_organizations(self, uri):
+        rq = """
+        select ?org ?label
+        where {
+            ?org a foaf:Organization .
+            ?org rdfs:label ?label .
+        }
+        LIMIT 10
+        """
+        out = []
+        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+            d = {}
+            d['uri'] = row.org.toPython()
+            d['id'] = d['uri']
+            d['text'] = row.label.toPython()
+            out.append(d)
+        return out
+
+    def get_faculty(self, uri):
+        rq = """
+        select ?fac ?label
+        where {
+            ?fac a vivo:FacultyMember .
+            ?fac rdfs:label ?label .
+        }
+        LIMIT 10
+        """
+        out = []
+        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+            d = {}
+            d['uri'] = row.fac.toPython()
+            d['id'] = d['uri']
+            d['text'] = row.label.toPython()
+            out.append(d)
+        return out
+
+    def get_context_data(self, local_name=None, **kwargs):
+            from backend import D, VIVO, RDFS
+            context = super(IndexView, self).get_context_data(**kwargs)
+            uri = D[local_name]
+            context['uri'] = uri
+            context['name'] = 'Index'
+            prepared_sections = []
+            orgs = {'id': 'orgs', 'label': 'Organizations'}
+            faculty = {'id': 'fac', 'label': 'Faculty'}
+            orgs['data'] = self.get_organizations(uri)
+            faculty['data'] = self.get_faculty(uri)
+            prepared_sections.append(orgs)
+            prepared_sections.append(faculty)
+            context['sections']  = prepared_sections
+            return context
 
 class PersonView(TemplateView, ResourceView):
     template_name = 'person.html'

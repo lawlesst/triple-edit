@@ -4,6 +4,7 @@ from views import (
     ResourceView,
     PersonView,
     UniversityView,
+    IndexView,
     FASTTopicAutocompleteView,
     FASTPlaceAutocompleteView,
     FASTOrganizationAutocompleteView
