@@ -14,7 +14,7 @@ from services import FASTService
 from backend import Vivo15Backend
 #from backend import Vivo16Backend
 ep = get_env('ENDPOINT')
-vstore = Vivo16Backend(ep)
+vstore = Vivo15Backend(ep)
 
 class ResourceView(View):
 
