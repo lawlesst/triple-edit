@@ -101,12 +101,13 @@ class IndexView(TemplateView, ResourceView):
             ?org a foaf:Organization .
             ?org rdfs:label ?label .
         }
+        ORDER BY ?label
         LIMIT 10
         """
         out = []
         for row in vstore.graph.query(rq, initBindings={'uri': uri}):
             d = {}
-            d['uri'] = row.org.toPython()
+            d['uri'] = row.org.toPython().split('/')[-1]
             d['id'] = d['uri']
             d['text'] = row.label.toPython()
             out.append(d)
@@ -119,31 +120,32 @@ class IndexView(TemplateView, ResourceView):
             ?fac a vivo:FacultyMember .
             ?fac rdfs:label ?label .
         }
+        ORDER BY ?label
         LIMIT 10
         """
         out = []
         for row in vstore.graph.query(rq, initBindings={'uri': uri}):
             d = {}
-            d['uri'] = row.fac.toPython()
+            d['uri'] = row.fac.toPython().split('/')[-1]
             d['id'] = d['uri']
             d['text'] = row.label.toPython()
             out.append(d)
         return out
 
     def get_context_data(self, local_name=None, **kwargs):
-            from backend import D, VIVO, RDFS
+            from backend import D
             context = super(IndexView, self).get_context_data(**kwargs)
             uri = D[local_name]
             context['uri'] = uri
             context['name'] = 'Index'
-            prepared_sections = []
-            orgs = {'id': 'orgs', 'label': 'Organizations'}
-            faculty = {'id': 'fac', 'label': 'Faculty'}
-            orgs['data'] = self.get_organizations(uri)
-            faculty['data'] = self.get_faculty(uri)
-            prepared_sections.append(orgs)
-            prepared_sections.append(faculty)
-            context['sections']  = prepared_sections
+            #orgs = {'id': 'orgs', 'label': 'Organizations'}
+            #faculty = {'id': 'fac', 'label': 'Faculty'}
+            orgs = self.get_organizations(uri)
+            faculty = self.get_faculty(uri)
+            #prepared_sections.append(orgs)
+            #prepared_sections.append(faculty)
+            context['orgs']  = orgs
+            context['people'] = faculty
             return context
 
 class PersonView(TemplateView, ResourceView):

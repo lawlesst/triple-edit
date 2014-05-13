@@ -2,20 +2,22 @@
 
 {% block content %}
 <div class="row">
-    <h2> {{ name }}</h2>
-    {% for section in sections %}
-      <h3>{{ section.label }}</h3>
-        <div>
-          {% if section.data %}
+    {% if people %}
+      <h2> People </h2>
+      {% for person in people %}
             <ul>
-            {% for obj in section.data %}
-              <li id="{{ obj.id }}"><a href="{{ obj.uri }}">{{ obj.text|safe }}</a></li>
-            {% endfor %}
+              <li><a href="{% url 'edit:person' local_name=person.uri %}">{{ person.text }}</a></li>
             </ul>
-          {% endif %}
-        </div>
-      <hr/>
-    {% endfor %}
+      {% endfor %}
+    {% endif %}
+    {% if orgs %}
+        <h2> Organizations </h2>
+        {% for org in orgs %}
+            <ul>
+              <li><a href="{% url 'edit:org' local_name=org.uri %}">{{ org.text }}</a></li>
+            </ul>
+        {% endfor %}
+    {% endif %}
 </div>
 
 
