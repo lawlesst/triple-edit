@@ -3,9 +3,6 @@ from django.http import HttpResponse, HttpResponseServerError
 from django.views.generic import TemplateView, View
 
 import json
-import urllib
-
-import requests
 
 from utils import JSONResponseMixin, get_env
 from services import FASTService
@@ -13,7 +10,9 @@ from services import FASTService
 # from backend import SQLiteBackend
 # vstore =SQLiteBackend()
 
+#A VIVO 15 Backend.
 from backend import Vivo15Backend
+#from backend import Vivo16Backend
 ep = get_env('ENDPOINT')
 vstore = Vivo15Backend(ep)
 
@@ -92,6 +91,7 @@ class UniversityView(TemplateView, ResourceView):
         context['profile'] = profile
         return context
 
+
 class PersonView(TemplateView, ResourceView):
     template_name = 'person.html'
 
@@ -112,11 +112,12 @@ class PersonView(TemplateView, ResourceView):
             out.append(d)
         return out
 
-    def get_geo_research_areas(self, uri):
+    def get_place_research_areas(self, uri):
         rq = """
         select ?ra ?label
         where {
-            ?uri blocal:hasGeographicResearchArea ?ra .
+            ?uri vivo:hasResearchArea ?ra .
+            ?ra a schema:Place .
             ?ra rdfs:label ?label .
         }
         """
@@ -129,6 +130,23 @@ class PersonView(TemplateView, ResourceView):
             out.append(d)
         return out
 
+    def get_affiliations(self, uri):
+        rq = """
+        select ?org ?label
+        where {
+            ?uri schema:affiliation ?org .
+            ?org rdfs:label ?label .
+        }
+        """
+        out = []
+        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+            d = {}
+            d['uri'] = row.org.toPython()
+            d['id'] = d['uri']
+            d['text'] = row.label.toPython()
+            out.append(d)
+        return out
+
     def get_context_data(self, local_name=None, **kwargs):
         from backend import D, VIVO, RDFS
         from display import person
@@ -136,28 +154,33 @@ class PersonView(TemplateView, ResourceView):
         uri = D[local_name]
         context['uri'] = uri
         context['name'] = vstore.graph.value(subject=uri, predicate=RDFS.label)
-        context['sections'] = person
-        #This will come from a sparql query.
+        #In production, this will neeed to be refactored because each call
+        #to graph generates a SPARQL query.
         profile = {
             'title': vstore.graph.value(subject=uri, predicate=VIVO.preferredTitle),
             'overview': vstore.graph.value(subject=uri, predicate=VIVO.overview),
             'researchOverview': vstore.graph.value(subject=uri, predicate=VIVO.researchOverview),
-            'teachingOverview': vstore.graph.value(subject=uri, predicate=VIVO.teachingOverview)
+            'teachingOverview': vstore.graph.value(subject=uri, predicate=VIVO.teachingOverview),
         }
         prepared_sections = []
         for section in person:
             if section['id'] == 'researchArea':
                 section['data'] = json.dumps(self.get_research_areas(uri))
-            elif section['id'] == 'geoResearchArea':
-                section['data'] = json.dumps(self.get_geo_research_areas(uri))
+            elif section['id'] == 'placeResearchArea':
+                section['data'] = json.dumps(self.get_place_research_areas(uri))
+            elif section['id'] == 'affiliations':
+                section['data'] = json.dumps(self.get_affiliations(uri))
             else:
                 section['data'] = profile.get(section['id'])
             prepared_sections.append(section)
-            #get the v
         context['sections']  = prepared_sections
         context['profile'] = profile
         return context
 
+
+#
+# - Services for autcomplete widgets
+#
 
 class FASTServiceView(View, JSONResponseMixin):
     def render_to_response(self, context):
@@ -175,11 +198,22 @@ class FASTTopicAutocompleteView(FASTServiceView):
         context['results'] = out
         return self.render_to_response(context)
 
-class FASTGeoAutocompleteView(FASTServiceView):
+class FASTPlaceAutocompleteView(FASTServiceView):
     def get(self, request, *args, **kwargs):
         fs = FASTService()
-        #topics
+        #locations/geograph
         index = 'suggest51'
+        context = {}
+        query = self.request.GET.get('query')
+        out = fs.get(query, index)
+        context['results'] = out
+        return self.render_to_response(context)
+
+class FASTOrganizationAutocompleteView(FASTServiceView):
+    def get(self, request, *args, **kwargs):
+        fs = FASTService()
+        #organizations
+        index = 'suggest10'
         context = {}
         query = self.request.GET.get('query')
         out = fs.get(query, index)

@@ -5,7 +5,8 @@ from views import (
     PersonView,
     UniversityView,
     FASTTopicAutocompleteView,
-    FASTGeoAutocompleteView
+    FASTPlaceAutocompleteView,
+    FASTOrganizationAutocompleteView
 )
 
 
@@ -15,5 +16,6 @@ urlpatterns = patterns('',
     url(r'^index/$', IndexView.as_view(), name='index'),
     url(r'^edit/', ResourceView.as_view(), name='edit'),
     url(r'^service/fast/topic/$', FASTTopicAutocompleteView.as_view(), name='fast-topic'),
-    url(r'^service/fast/geo/$', FASTGeoAutocompleteView.as_view(), name='fast-geo'),
+    url(r'^service/fast/place/$', FASTPlaceAutocompleteView.as_view(), name='fast-place'),
+    url(r'^service/fast/org/$', FASTOrganizationAutocompleteView.as_view(), name='fast-org'),
 )

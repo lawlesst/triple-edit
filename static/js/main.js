@@ -80,8 +80,10 @@ function setupMultiTag() {
         var prop = $(elem).data('predicate')
         if (range == 'vivo:ResearchArea') {
             var endpoint = KEYWORD_SERVICE;
-        } else if (range == 'blocal:GeographicLocation') {
-            var endpoint = GEO_SERVICE;
+        } else if (range == 'schema:Place') {
+            var endpoint = PLACE_SERVICE;
+        } else if (range == 'schema:Organization') {
+            var endpoint = ORG_SERVICE;
         }
         setAutocomplete(s, 'skos:Concept', true, true, endpoint);
         $(s).select2('data', window[elem.getAttribute('id') + 'InitData'] || []);

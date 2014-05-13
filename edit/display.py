@@ -25,13 +25,21 @@ person = [
    #    'label':'Teaching overview'
    # },
    # {
-   #  'id': 'geoResearchArea',
-   #  'predicate': 'blocal:hasGeographicResearchArea',
+   #  'id': 'placeResearchArea',
+   #  'predicate': 'vivo:hasResearchArea',
    #  'etype': 'multi-tag',
-   #  'range': 'blocal:GeographicLocation',
-   #  'label': 'Geographic research areas / Places',
-   # }
+   #  'range': 'schema:Place',
+   #  'label': 'Geographic research areas',
+   # },
+   {
+    'id': 'affiliations',
+    'predicate': 'schema:affiliation',
+    'etype': 'multi-tag',
+    'range': 'schema:Organization',
+    'label': 'Affiliated organizations',
+   }
 ]
+
 university =[
    {
       'id':'overview',
