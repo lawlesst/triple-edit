@@ -131,7 +131,6 @@ class Vivo16Backend(BaseBackend):
     def do_update(self, query):
         logging.debug(query)
         update_url = get_env('VIVO_URL') + '/api/sparqlUpdate'
-        print update_url
         sparql = SPARQLWrapper(update_url)
         sparql.addParameter('email', get_env('VIVO_USER'))
         sparql.addParameter('password', get_env('VIVO_PASSWORD'))
