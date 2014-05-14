@@ -12,7 +12,8 @@ A Django application for editing RDF data.
     * You will need access to a VIVO instance for writing data changes
  * run `python manage.py runserver` to start up the Django development serve
 
- ##Backends
+##Backends
+ 
  For now there is a notion of a backend where edited data will be written.  It's defaulting to
  a VIVO 1.5 backend.  If your environment is configured properly in `.env` then you are ready to 
  begin testing the application.  To set a backend, adjust the code in views.py, begining on line 13
