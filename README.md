@@ -23,6 +23,7 @@ A Django application for editing RDF data.
 ##Managing the application.
 
 Documentation needed:
+
  * Changing display and edit sections
  * Changing SPARQL queries
  * Adding functionality to the data edits.
