@@ -11,6 +11,7 @@ A Django application for editing RDF data.
     * You will need access to a SPARQL endpoint for read queries
     * You will need access to a VIVO instance for writing data changes
  * run `python manage.py runserver` to start up the Django development serve
+ * visit `http://localhost:8000` in your browser.  There should be a listing of people and organizations if your connection to a SPARQL endpoint is configured properly.
 
 ##Backends
  
