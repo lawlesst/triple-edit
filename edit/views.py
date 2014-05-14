@@ -12,7 +12,6 @@ from services import FASTService
 
 #A VIVO 15 Backend.
 from backend import Vivo15Backend
-#from backend import Vivo16Backend
 ep = get_env('ENDPOINT')
 vstore = Vivo15Backend(ep)
 
