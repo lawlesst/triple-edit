@@ -16,6 +16,8 @@ from utils import get_env
 VIVO = Namespace('http://vivoweb.org/ontology/core#')
 SCHEMA = Namespace('http://schema.org/')
 FOAF = Namespace('http://xmlns.com/foaf/0.1/')
+OBO = Namespace('http://purl.obolibrary.org/obo/')
+VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 #local data namespace
 d = get_env('NAMESPACE')
@@ -100,26 +102,21 @@ class BaseBackend(object):
         """
         if triple == {}:
             return Graph()
-        #We will leave the object blank.
-        q = """
-        CONSTRUCT {{
-            <{0}> {1} ?object
-        }}
-        WHERE {{
-            <{0}> {1} ?object
-        }}
-        """.format(triple['subject'], triple['predicate'])
-        try:
-            results = self.graph.query(q)
-            subtract_graph = results.graph
-        except ResultException:
+        pred = self.get_prop_from_abbrv(triple['predicate'])
+        sub = URIRef(triple['subject'])
+        val = self.graph.value(subject=sub, predicate=pred)
+        if val is None:
             return Graph()
-        return subtract_graph
+        else:
+            subtract = Graph()
+            subtract.add((sub, pred, val))
+            return subtract
 
     def add_remove(self, *args):
         raise NotImplementedError("Add and remove not defined.")
 
-class Vivo16Backend(BaseBackend):
+
+class VivoBackend(BaseBackend):
 
     def __init__(self, endpoint):
         graph = ConjunctiveGraph('SPARQLStore')
@@ -146,9 +143,9 @@ class Vivo16Backend(BaseBackend):
             triple = "%s %s %s .\n" % (subject.n3(), predicate.n3(), obj.n3())
             stmts += triple
         if delete is False:
-            return u"INSERT DATA { GRAPH <%s> { %s } }" % (nameg, stmts)
+            return u"INSERT DATA { GRAPH <%s> { %s } }; \n" % (nameg, stmts)
         else:
-            return u"DELETE DATA { GRAPH <%s> { %s } }" % (nameg, stmts)
+            return u"DELETE DATA { GRAPH <%s> { %s } }; \n" % (nameg, stmts)
 
     def add_remove(self, add_g, subtract_g, name=None):
         #DELETE { GRAPH <g1> { a b c } } INSERT { GRAPH <g1> { x y z } }
