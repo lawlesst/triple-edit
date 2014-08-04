@@ -20,7 +20,9 @@ from backend import D, VIVO, RDF
 from display import organization, person
 
 class ResourceView(View):
-
+    """
+    Handle edits posted by the rich text and tagging widgets..
+    """
     def post(self, *args, **kwargs):
         posted = self.request.POST
         edit = json.loads(posted.get('edit'))
@@ -165,6 +167,7 @@ class IndexView(TemplateView, ResourceView):
             orgs += groups
             context['orgs'] = orgs
         return context
+
 
 class PersonView(TemplateView, ResourceView, BasePropertyView):
     template_name = 'person.html'
