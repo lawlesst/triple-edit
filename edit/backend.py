@@ -170,68 +170,6 @@ class VivoBackend(BaseBackend):
         self.do_update(rq)
         return True
 
-
-class Vivo15Backend(BaseBackend):
-    def __init__(self, endpoint):
-        graph = ConjunctiveGraph('SPARQLStore')
-        graph.open(endpoint)
-        graph.namespace_manager=ns_mgr
-        self.graph = graph
-
-    def get_session(self):
-        """
-        Verify that user is logged in by issuing
-        a HEAD request.  This adds overheard to
-        each edit but should be minimal as it just
-        verifies the session and does not follow
-        redirects.
-        """
-        from vivo_utils import web_client
-        #create a vivo_session object
-        vivo_session = web_client.Session()
-        ping = vivo_session.session.head(vivo_session.url + 'siteAdmin')
-        if ping.status_code == 302:
-            logging.debug("Creating VIVO session")
-            vivo_session.login()
-        else:
-            logging.debug("VIVO session exists")
-        return vivo_session
-
-    def primitive_edit(self, add_graph, subtract_graph):
-        """
-        A update access layer via sending HTTP requests
-        to VIVO web application.  This should be served
-        by SPARQL update when that is available via
-        a VIVO web service.
-        """
-        vivo_url = get_env('VIVO_URL')
-        vs = self.get_session()
-        if (len(add_graph) == 0) and (len(subtract_graph) == 0):
-            logging.info('Add and subtract graph are both empty.  Not submitting edit.')
-            return True
-        #Don't post when change graphs are equal.
-        if add_graph == subtract_graph:
-            logging.info('Add and subtract graph are equal.  Not submitting edit.')
-            return True
-        payload = dict(
-            additions=add_graph.serialize(format='n3'),
-            retractions=subtract_graph.serialize(format='n3'),
-        )
-        resp = vs.session.post(
-            vivo_url + '/edit/primitiveRdfEdit',
-            data=payload,
-            verify=False
-        )
-        if resp.status_code != 200:
-            logging.error("VIVO app response:\n" + resp.text)
-            logging.error("Add graph:\n" + add_graph.serialize(format='nt'))
-            logging.error("Subtract graph:\n" + subtract_graph.serialize(format='nt'))
-            raise VIVOEditError('VIVO data editing failed')
-        return True
-
-    def add_remove(self, add_g, subtract_g):
-        return self.primitive_edit(add_g, subtract_g)
-
 class VIVOEditError(Exception):
     def __init__self(self, message, Errors):
         #http://stackoverflow.com/questions/1319615/proper-way-to-declare-custom-exceptions-in-modern-python
