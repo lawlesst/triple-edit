@@ -2,6 +2,8 @@ import urllib
 
 import requests
 
+from utils import get_env
+
 class FASTService(object):
 
     def __init__(self):
@@ -41,5 +43,34 @@ class FASTService(object):
             d['uri'] = self.make_uri(pid)
             d['id'] = pid
             d['text'] = name
+            out.append(d)
+        return out
+
+
+class VIVOService(object):
+    def __init__(self):
+        from mysolr import Solr
+        surl = get_env('SOLR_URL')
+        self.solr = Solr(surl)
+
+    def get(self, query, class_type):
+        out = []
+        #Will use acNameStemmed for now.  Can construct a more intelligent query
+        #later if necessary.
+        query = {
+            'q': u'acNameStemmed:{0} type:{1}'.format(query, class_type),
+            'fl': 'URI,nameRaw,PREFERRED_TITLE',
+            'rows': 20
+        }
+        response = self.solr.search(**query)
+        #Massage the Solr response.
+        for doc in response.documents:
+            d = {}
+            d['uri'] = doc['URI']
+            d['id'] = doc['URI']
+            d['text'] = "{} - {}".format(
+                doc['nameRaw'][0],
+                doc['PREFERRED_TITLE'][0]
+            )
             out.append(d)
         return out

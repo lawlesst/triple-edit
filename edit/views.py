@@ -7,7 +7,7 @@ import json
 from rdflib import Graph, RDFS, URIRef, Literal
 
 from utils import JSONResponseMixin, get_env
-from services import FASTService
+from services import FASTService, VIVOService
 
 #Setup a triple store
 # from backend import SQLiteBackend
@@ -209,6 +209,22 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
             out.append(d)
         return out
 
+    def get_collaborators(self, uri):
+        rq = """
+        select ?collab ?name
+        where {
+            ?uri vivo:hasCollaborator ?collab .
+            ?collab rdfs:label ?name .
+        }"""
+        out = []
+        for row in tstore.graph.query(rq, initBindings={'uri': uri}):
+            d = {}
+            d['uri'] = row.collab.toPython()
+            d['id'] = d['uri']
+            d['text'] = row.name.toPython()
+            out.append(d)
+        return out
+
     def get_details(self, uri):
         #Get the name, title and other non-editable details.
         rq = """
@@ -216,6 +232,7 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
             ?fac d:name ?label .
             ?fac d:title ?title .
             ?org d:org ?orgName .
+            ?collab d:collabName ?collabName .
         }
         where {
             ?fac rdfs:label ?label
@@ -239,7 +256,7 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
         return {
             'name': g.value(subject=uri, predicate=D['name']),
             'title': g.value(subject=uri, predicate=D['title']),
-            'orgs': [{'id' : o.org.toPython().replace(D, ''), 'name': o.name} for o in g.query('select ?org ?name where { ?org d:org ?name}')]
+            'orgs': [{'id' : o.org.toPython().replace(D, ''), 'name': o.name} for o in g.query('select ?org ?name where { ?org d:org ?name}')],
         }
 
     def get_context_data(self, local_name=None, **kwargs):
@@ -264,6 +281,8 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
                 section['data'] = json.dumps(self.get_place_research_areas(uri))
             elif section['id'] == 'affiliations':
                 section['data'] = json.dumps(self.get_affiliations(uri))
+            elif section['id'] == 'collaborators':
+                section['data'] = json.dumps(self.get_collaborators(uri))
             else:
                 section['data'] = profile.get(section['id'])
             prepared_sections.append(section)
@@ -276,11 +295,11 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
 # - Services for autcomplete widgets
 #
 
-class FASTServiceView(View, JSONResponseMixin):
+class JSONServiceView(View, JSONResponseMixin):
     def render_to_response(self, context):
         return JSONResponseMixin.render_to_response(self, context)
 
-class FASTTopicAutocompleteView(FASTServiceView):
+class FASTTopicAutocompleteView(JSONServiceView):
 
     def get(self, request, *args, **kwargs):
         fs = FASTService()
@@ -292,7 +311,7 @@ class FASTTopicAutocompleteView(FASTServiceView):
         context['results'] = out
         return self.render_to_response(context)
 
-class FASTPlaceAutocompleteView(FASTServiceView):
+class FASTPlaceAutocompleteView(JSONServiceView):
     def get(self, request, *args, **kwargs):
         fs = FASTService()
         #locations/geograph
@@ -303,13 +322,24 @@ class FASTPlaceAutocompleteView(FASTServiceView):
         context['results'] = out
         return self.render_to_response(context)
 
-class FASTOrganizationAutocompleteView(FASTServiceView):
+class FASTOrganizationAutocompleteView(JSONServiceView):
     def get(self, request, *args, **kwargs):
         fs = FASTService()
+        context = {}
         #organizations
         index = 'suggest10'
-        context = {}
         query = self.request.GET.get('query')
         out = fs.get(query, index)
+        context['results'] = out
+        return self.render_to_response(context)
+
+
+class VIVOCollaboratorsAutocompleteView(JSONServiceView):
+    def get(self, request, *args, **kwargs):
+        #fellow faculty members.
+        context = {}
+        vs = VIVOService()
+        query = self.request.GET.get('query')
+        out = vs.get(query, VIVO['FacultyMember'].toPython())
         context['results'] = out
         return self.render_to_response(context)

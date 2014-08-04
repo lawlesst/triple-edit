@@ -8,3 +8,4 @@ NAMESPACE=http://localhost/individual/
 VIVO_URL=http://localhost:8080/vivo
 VIVO_USER=vivo_root@school.edu
 VIVO_PASSWORD=password
+SOLR_URL=http://localhost:8080/vivosolr

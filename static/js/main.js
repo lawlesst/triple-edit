@@ -71,21 +71,33 @@ function ckPropertyEdit(elem, text) {
 };
 
 //http://jsfiddle.net/bz6rh/
+function setupMultiTagNoCreate(){
+  var ems = $('.multitag-select-only');
+  addTagWidget(ems, false)
+}
+
 function setupMultiTag() {
-    var mt = $('.multitag');
-    $.each(mt, function(index, elem){
+  var mt = $('.multitag');
+  addTagWidget(mt, true);
+};
+
+function addTagWidget(selector, create) {
+    $.each(selector, function(index, elem){
         var s = '#' + elem.getAttribute('id');
         var range = $(elem).data('range');
-        var uri = $(elem).data('subject')
-        var prop = $(elem).data('predicate')
+        var uri = $(elem).data('subject');
+        var prop = $(elem).data('predicate');
+        //Ideally this would come from the config ontology
         if (range == 'skos:Concept') {
             var endpoint = KEYWORD_SERVICE;
         } else if (range == 'schema:Place') {
             var endpoint = PLACE_SERVICE;
         } else if (range == 'schema:Organization') {
             var endpoint = ORG_SERVICE;
+        } else if (range == 'vivo:FacultyMember') {
+            var endpoint = COLLABORATOR_SERVICE;
         }
-        setAutocomplete(s, 'skos:Concept', true, true, endpoint);
+        setAutocomplete(s, 'skos:Concept', true, create, endpoint);
         $(s).select2('data', window[elem.getAttribute('id') + 'InitData'] || []);
         $(s).on("change", function(e) {
               //console.debug("change "+JSON.stringify({val:e.val, added:e.added, removed:e.removed}));

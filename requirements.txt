@@ -2,7 +2,4 @@ Django
 django-dotenv
 requests
 rdflib
-#Only if you want to use an RDFLib database backend.
-#git+https://github.com/RDFLib/rdflib-sqlalchemy.git
-#For writing to VIVO 1.5
-git+https://github.com/lawlesst/vivo-utils.git
+mysolr

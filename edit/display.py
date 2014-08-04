@@ -5,6 +5,14 @@ person = [
       'etype':'ckedit',
       'label':'Overview'
    },
+   {
+      'id':'collaborators',
+      'predicate':'vivo:hasCollaborator',
+      #multi-tag-select means the value has to exist.
+      'etype':'multi-tag-select',
+      'label':'Collaborators',
+      'range': 'vivo:FacultyMember',
+   },
    # {
    #    'id':'researchOverview',
    #    'predicate':'vivo:researchOverview',

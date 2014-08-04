@@ -18,6 +18,8 @@
         {% include "snippets/ckedit.html" %}
       {% elif section.etype == "multi-tag" %}
           {% include "snippets/multi-tag.html" %}
+      {% elif section.etype == "multi-tag-select" %}
+          {% include "snippets/multi-tag-select.html" %}
       {% endif %}
       <hr/>
     {% endfor %}
