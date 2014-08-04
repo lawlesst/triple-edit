@@ -15,7 +15,7 @@ person = [
     'id': 'researchArea',
     'predicate': 'vivo:hasResearchArea',
     'etype': 'multi-tag',
-    'range': 'vivo:ResearchArea',
+    'range': 'skos:Concept',
     'label': 'Research areas',
    },
    # {
@@ -24,20 +24,20 @@ person = [
    #    'etype':'ckedit',
    #    'label':'Teaching overview'
    # },
-   # {
-   #  'id': 'placeResearchArea',
-   #  'predicate': 'vivo:hasResearchArea',
-   #  'etype': 'multi-tag',
-   #  'range': 'schema:Place',
-   #  'label': 'Geographic research areas',
-   # },
-   # {
-   #  'id': 'affiliations',
-   #  'predicate': 'schema:affiliation',
-   #  'etype': 'multi-tag',
-   #  'range': 'schema:Organization',
-   #  'label': 'Affiliated organizations',
-   # }
+   {
+    'id': 'placeResearchArea',
+    'predicate': 'vivo:hasResearchArea',
+    'etype': 'multi-tag',
+    'range': 'schema:Place',
+    'label': 'Geographic research areas',
+   },
+   {
+    'id': 'affiliations',
+    'predicate': 'schema:affiliation',
+    'etype': 'multi-tag',
+    'range': 'schema:Organization',
+    'label': 'Affiliated organizations',
+   }
 ]
 
 university =[
