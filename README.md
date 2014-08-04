@@ -1,26 +1,26 @@
 #triple-edit
 
-This is a Django application for editing RDF data.  created for the [2014 VIVO Conference Apps and Tools workshop](https://www.etouches.com/ehome/80403/189150/).  It's a proof-of-concept designed with the [VIVO](http://vivoweb.org) research networking system in mind, but in principle, it should work with any triple store that you can write to from Python code.
+This is a Django application for editing RDF data created for the [2014 VIVO Conference Apps and Tools workshop](https://www.etouches.com/ehome/80403/189150/).  It's a proof-of-concept designed with the [VIVO](http://vivoweb.org) research networking system in mind, but in principle, it should work with any triplestore that supports SPARQL read queries and SPARQL updates from Python code.
 
 ##Functionality
 
- * [ckeditor](http://ckeditor.com/) for editing data properties containing text
+ * [ckeditor](http://ckeditor.com/) for editing data properties containing text.
 
  * [Select2](http://ivaynberg.github.io/select2/) tagging widgets which allow for the easy lookup of entities and establishing relations with those.  In the sample application the [FAST](http://fast.oclc.org/searchfast/) web service is used to lookup skos:Concepts.
 
- * [HTML5 boilerplate](http://www.initializr.com/try) and is repsonsive, which makes it mobile friendly as is.
+ * [HTML5 boilerplate](http://www.initializr.com/try) and is repsonsive, which makes it mobile friendly.
 
 ##Use cases - what could I do with this?
 
- * create a "VIVO manager"-type application that allows researchers to manager and update [VIVO](http://vivoweb.org) research profiles.
+ * create an application that allows researchers to manager and update [VIVO](http://vivoweb.org) research profiles.
 
- * create a mobile or table application that allows for straightforward editing of a subset of triple store data by end users.
+ * create a mobile or table application that allows for straightforward editing of a subset of triplestore data by end users.
 
- * as a data curating or cleaning tool.  SPARQL queries could pull problematic data from your triple-store and the built in widgets (or new widgets) could be used by staff to clean or augment the data.
+ * as a data curating or cleaning tool.  SPARQL queries could pull problematic data from your triplestore and the built in widgets (or new widgets) could be used by staff to clean or augment the data.
 
  * as an educational tool to learn more about SPARQL, ontologies and RDF.  Personal experience disclaimer: when you try to read and write RDF data directly, the learning happens hard but faster.
 
-A a [presentation](https://www.youtube.com/watch?v=cMprPKBRCl4) is available on YouTube that highlights some of the functionality and motivations behind using an application like this to manage data in a triple store.
+A [presentation](https://www.youtube.com/watch?v=cMprPKBRCl4) is available on YouTube that highlights some of the functionality and motivations behind using an application like this to manage data in a triple store.
 
 ##Install
 
@@ -42,5 +42,5 @@ A a [presentation](https://www.youtube.com/watch?v=cMprPKBRCl4) is available on 
 
 To make ready use of this application, you would need access to a [VIVO](http://github.com/lawlesst/vivo-vagrant) instance with [sample data](http://github.com/lawlesst/vivo-sample-data).
 
-If you are interested in using it with other triple stores (Sesame seems to be a good candidate, Fuesiki with updates turned on too) or applications, use the bundled `VivoBackend` as an example for writing your own backend.  If you wanted to write your own backend class it would need an `add_remove` method that accepts a RDFLib graph of additions and subtractions.  That's it.  Again, this is for demonstration purposes so it will require some tinkering and original code to connect to a different backend.
+If you are interested in using it with other triplestores (Sesame seems to be a good candidate, Fuesiki with updates turned on too) or applications, use the bundled `VivoBackend` as an example for writing your own backend.  Your own backend class it would need an `add_remove` method that accepts a RDFLib graph of additions and subtractions.  That's it.  Again, this is for demonstration purposes so it will require some tinkering and original code to connect to a different backend.
 
