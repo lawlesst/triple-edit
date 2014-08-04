@@ -14,7 +14,7 @@
         <h2> Organizations </h2>
         {% for org in orgs %}
             <ul>
-              <li><a href="{% url 'edit:org' local_name=org.uri %}">{{ org.text }}</a></li>
+              <li><a href="{% url 'edit:organization' local_name=org.uri %}">{{ org.text }}</a></li>
             </ul>
         {% endfor %}
     {% endif %}

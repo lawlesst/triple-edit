@@ -146,7 +146,7 @@ class VivoBackend(BaseBackend):
         nameg = name or self.default_graph
         stmts = u''
         for subject, predicate, obj in change_graph:
-            triple = "%s %s %s .\n" % (subject.n3(), predicate.n3(), obj.n3())
+            triple = u"%s %s %s .\n" % (subject.n3(), predicate.n3(), obj.n3())
             stmts += triple
         if delete is False:
             return u"INSERT DATA { GRAPH <%s> { %s } }; \n" % (nameg, stmts)

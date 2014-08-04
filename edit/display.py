@@ -47,4 +47,11 @@ university =[
       'etype':'ckedit',
       'label':'Overview'
    },
+   {
+    'id': 'placeResearchArea',
+    'predicate': 'vivo:hasResearchArea',
+    'etype': 'multi-tag',
+    'range': 'schema:Place',
+    'label': 'Geographic research areas',
+   },
 ]

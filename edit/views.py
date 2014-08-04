@@ -102,7 +102,7 @@ class IndexView(TemplateView, ResourceView):
             ?org rdfs:label ?label .
         }
         ORDER BY ?label
-        LIMIT 10
+        #LIMIT 10
         """
         out = []
         for row in vstore.graph.query(rq, initBindings={'uri': uri}):
@@ -121,7 +121,7 @@ class IndexView(TemplateView, ResourceView):
             ?fac rdfs:label ?label .
         }
         ORDER BY ?label
-        LIMIT 10
+        #LIMIT 10
         """
         out = []
         for row in vstore.graph.query(rq, initBindings={'uri': uri}):
@@ -233,7 +233,7 @@ class PersonView(TemplateView, ResourceView):
         return {
             'name': g.value(subject=uri, predicate=D['name']),
             'title': g.value(subject=uri, predicate=D['title']),
-            'orgs': [o for o in g.query('select ?org ?name where { ?org d:org ?name}')]
+            'orgs': [{'id' : o.org.toPython().replace(D, ''), 'name': o.name} for o in g.query('select ?org ?name where { ?org d:org ?name}')]
         }
 
     def get_context_data(self, local_name=None, **kwargs):
@@ -249,6 +249,7 @@ class PersonView(TemplateView, ResourceView):
             'teachingOverview': vstore.graph.value(subject=uri, predicate=VIVO.teachingOverview),
         }
         profile.update(details)
+        print profile['orgs']
         prepared_sections = []
         for section in person:
             if section['id'] == 'researchArea':
