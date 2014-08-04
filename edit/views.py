@@ -66,8 +66,28 @@ class ResourceView(View):
 
         return HttpResponseServerError("Edit failed.")
 
+class BasePropertyView(View):
 
-class UniversityView(TemplateView, ResourceView):
+    def get_place_research_areas(self, uri):
+        rq = """
+        select ?ra ?label
+        where {
+            ?uri vivo:hasResearchArea ?ra .
+            ?ra a schema:Place .
+            ?ra rdfs:label ?label .
+        }
+        """
+        out = []
+        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+            d = {}
+            d['uri'] = row.ra.toPython()
+            d['id'] = d['uri']
+            d['text'] = row.label.toPython()
+            out.append(d)
+        return out
+
+
+class UniversityView(TemplateView, ResourceView, BasePropertyView):
     template_name = 'university.html'
 
     def get_context_data(self, local_name=None, **kwargs):
@@ -82,8 +102,8 @@ class UniversityView(TemplateView, ResourceView):
         for section in university:
             if section['id'] == 'researchArea':
                 section['data'] = json.dumps(self.get_research_areas(uri))
-            elif section['id'] == 'geoResearchArea':
-                section['data'] = json.dumps(self.get_geo_research_areas(uri))
+            elif section['id'] == 'placeResearchArea':
+                section['data'] = json.dumps(self.get_place_research_areas(uri))
             else:
                 section['data'] = profile.get(section['id'])
             prepared_sections.append(section)
@@ -102,7 +122,7 @@ class IndexView(TemplateView, ResourceView):
             ?org rdfs:label ?label .
         }
         ORDER BY ?label
-        #LIMIT 10
+        LIMIT 10
         """
         out = []
         for row in vstore.graph.query(rq, initBindings={'uri': uri}):
@@ -121,7 +141,7 @@ class IndexView(TemplateView, ResourceView):
             ?fac rdfs:label ?label .
         }
         ORDER BY ?label
-        #LIMIT 10
+        LIMIT 10
         """
         out = []
         for row in vstore.graph.query(rq, initBindings={'uri': uri}):
@@ -147,7 +167,7 @@ class IndexView(TemplateView, ResourceView):
         context['people'] = faculty
         return context
 
-class PersonView(TemplateView, ResourceView):
+class PersonView(TemplateView, ResourceView, BasePropertyView):
     template_name = 'person.html'
 
     def get_research_areas(self, uri):
@@ -157,24 +177,6 @@ class PersonView(TemplateView, ResourceView):
             ?uri vivo:hasResearchArea ?ra .
             ?ra rdfs:label ?label .
             FILTER NOT EXISTS {?ra a schema:Place }
-        }
-        """
-        out = []
-        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
-            d = {}
-            d['uri'] = row.ra.toPython()
-            d['id'] = d['uri']
-            d['text'] = row.label.toPython()
-            out.append(d)
-        return out
-
-    def get_place_research_areas(self, uri):
-        rq = """
-        select ?ra ?label
-        where {
-            ?uri vivo:hasResearchArea ?ra .
-            ?ra a schema:Place .
-            ?ra rdfs:label ?label .
         }
         """
         out = []
