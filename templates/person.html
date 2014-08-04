@@ -2,9 +2,15 @@
 
 {% block content %}
 <div class="row">
-    <h2> {{ name }}</h2>
+    <h2> {{ profile.name }}</h2>
     {% if profile.title %}
-        <h5> {{ profile.title }}</h5>
+        <h4> {{ profile.title }}</h4>
+    {% endif %}
+    {% if profile.orgs %}
+        <h5>Affiliations</h5>
+        {% for org in profile.orgs %}
+          <h6> <a href="{{ org.org }}">{{ org.name }}</a></h6>
+        {% endfor %}
     {% endif %}
     {% for section in sections %}
       <h3>{{ section.label }}</h3>

@@ -4,27 +4,27 @@ from django.views.generic import TemplateView, View
 
 import json
 
+from rdflib import Graph, RDFS, URIRef, Literal
+
 from utils import JSONResponseMixin, get_env
 from services import FASTService
+
+from backend import D, VIVO, RDFS, RDF
+from display import university, person
 
 # from backend import SQLiteBackend
 # vstore =SQLiteBackend()
 
-#A VIVO 15 Backend.
-from backend import Vivo15Backend
+from backend import VivoBackend
 ep = get_env('ENDPOINT')
-vstore = Vivo15Backend(ep)
+vstore = VivoBackend(ep)
 
 class ResourceView(View):
 
     def post(self, *args, **kwargs):
-        #from backend import vstore, make_edit_graph, get_subtract_graph, add_remove, VIVO
-        from rdflib import Graph, RDFS, URIRef, Literal
         posted = self.request.POST
-        #import pdb; pdb.set_trace()
         edit = json.loads(posted.get('edit'))
         if edit.get('type') == 'ck':
-            #import ipdb; ipdb.set_trace();
             add_stmts = edit['add']
             add_g = vstore.make_edit_graph(add_stmts)
             subtract_g = vstore.get_subtract_graph(add_stmts)
@@ -43,6 +43,10 @@ class ResourceView(View):
                     #Make sure we have the text for the added KW
                     obj_uri = URIRef(add_stmts['object'])
                     add_g.add((obj_uri, RDFS.label, Literal(add_stmts['text'])))
+                    #Add type.
+                    atype = vstore.get_prop_from_abbrv(add_stmts['range'])
+                    add_g.add((obj_uri, RDF.type, atype))
+
                 add_g += vstore.make_edit_graph(add_stmts)
             else:
                 add_g = Graph()
@@ -60,7 +64,6 @@ class ResourceView(View):
         else:
             return HttpResponseServerError("Edit failed.")
 
-        #return HttpResponse('', 200 )
         return HttpResponseServerError("Edit failed.")
 
 
@@ -68,8 +71,6 @@ class UniversityView(TemplateView, ResourceView):
     template_name = 'university.html'
 
     def get_context_data(self, local_name=None, **kwargs):
-        from backend import D, VIVO, RDFS
-        from display import university
         context = {}
         uri = D[local_name]
         context['uri'] = uri
@@ -132,20 +133,19 @@ class IndexView(TemplateView, ResourceView):
         return out
 
     def get_context_data(self, local_name=None, **kwargs):
-            from backend import D
-            context = super(IndexView, self).get_context_data(**kwargs)
-            uri = D[local_name]
-            context['uri'] = uri
-            context['name'] = 'Index'
-            #orgs = {'id': 'orgs', 'label': 'Organizations'}
-            #faculty = {'id': 'fac', 'label': 'Faculty'}
-            orgs = self.get_organizations(uri)
-            faculty = self.get_faculty(uri)
-            #prepared_sections.append(orgs)
-            #prepared_sections.append(faculty)
-            context['orgs']  = orgs
-            context['people'] = faculty
-            return context
+        context = super(IndexView, self).get_context_data(**kwargs)
+        uri = D[local_name]
+        context['uri'] = uri
+        context['name'] = 'Index'
+        #orgs = {'id': 'orgs', 'label': 'Organizations'}
+        #faculty = {'id': 'fac', 'label': 'Faculty'}
+        orgs = self.get_organizations(uri)
+        faculty = self.get_faculty(uri)
+        #prepared_sections.append(orgs)
+        #prepared_sections.append(faculty)
+        context['orgs']  = orgs
+        context['people'] = faculty
+        return context
 
 class PersonView(TemplateView, ResourceView):
     template_name = 'person.html'
@@ -156,6 +156,7 @@ class PersonView(TemplateView, ResourceView):
         where {
             ?uri vivo:hasResearchArea ?ra .
             ?ra rdfs:label ?label .
+            FILTER NOT EXISTS {?ra a schema:Place }
         }
         """
         out = []
@@ -202,21 +203,52 @@ class PersonView(TemplateView, ResourceView):
             out.append(d)
         return out
 
+    def get_details(self, uri):
+        #Get the name, title and other non-editable details.
+        rq = """
+        CONSTRUCT {
+            ?fac d:name ?label .
+            ?fac d:title ?title .
+            ?org d:org ?orgName .
+        }
+        where {
+            ?fac rdfs:label ?label
+            OPTIONAL {
+                #Property paths are real slow.
+                ?fac obo:ARG_2000028 ?vc .
+                ?vc vcard:hasTitle ?t .
+                ?t vcard:title ?title .
+            }
+            OPTIONAL {
+                ?position a vivo:Position ;
+                          vivo:relates ?fac ;
+                          vivo:relates ?org .
+                ?org a foaf:Organization.
+                ?org rdfs:label ?orgName .
+            }
+        }
+        """
+        data = vstore.graph.query(rq, initBindings={'fac': uri})
+        g = data.graph
+        return {
+            'name': g.value(subject=uri, predicate=D['name']),
+            'title': g.value(subject=uri, predicate=D['title']),
+            'orgs': [o for o in g.query('select ?org ?name where { ?org d:org ?name}')]
+        }
+
     def get_context_data(self, local_name=None, **kwargs):
-        from backend import D, VIVO, RDFS
-        from display import person
         context = super(PersonView, self).get_context_data(**kwargs)
         uri = D[local_name]
+        details = self.get_details(uri)
         context['uri'] = uri
-        context['name'] = vstore.graph.value(subject=uri, predicate=RDFS.label)
-        #In production, this will neeed to be refactored because each call
+        #In production, this will need to be refactored because each call
         #to graph generates a SPARQL query.
         profile = {
-            'title': vstore.graph.value(subject=uri, predicate=VIVO.preferredTitle),
             'overview': vstore.graph.value(subject=uri, predicate=VIVO.overview),
             'researchOverview': vstore.graph.value(subject=uri, predicate=VIVO.researchOverview),
             'teachingOverview': vstore.graph.value(subject=uri, predicate=VIVO.teachingOverview),
         }
+        profile.update(details)
         prepared_sections = []
         for section in person:
             if section['id'] == 'researchArea':
