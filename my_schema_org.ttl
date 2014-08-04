@@ -35,3 +35,5 @@ schema:Organization
 schema:Organization vitro:inClassGroup       <http://vivoweb.org/ontology#vitroClassGrouporganizations> .
 
 schema:Place vitro:inClassGroup       <http://vivoweb.org/ontology#vitroClassGrouplocations> .
+
+schema:affiliation vitro:inPropertyGroupAnnot    <http://vivoweb.org/ontology#vitroPropertyGroupaffiliation> .
