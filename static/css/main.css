@@ -4,6 +4,18 @@
    Author's custom styles
    ========================================================================== */
 
+.header-container {
+    border-bottom: 20px solid #929596;
+}
+
+.footer-container,
+.main aside {
+    border-top: 20px solid #929596;
+}
+
+nav a {
+    background: #929596;
+}
 
 .ck-save {
     display: none;

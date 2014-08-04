@@ -9,15 +9,15 @@ from rdflib import Graph, RDFS, URIRef, Literal
 from utils import JSONResponseMixin, get_env
 from services import FASTService
 
-from backend import D, VIVO, RDFS, RDF
-from display import university, person
-
+#Setup a triple store
 # from backend import SQLiteBackend
-# vstore =SQLiteBackend()
-
+# tstore =SQLiteBackend()
 from backend import VivoBackend
 ep = get_env('ENDPOINT')
-vstore = VivoBackend(ep)
+tstore = VivoBackend(ep)
+
+from backend import D, VIVO, RDF
+from display import university, person
 
 class ResourceView(View):
 
@@ -26,14 +26,14 @@ class ResourceView(View):
         edit = json.loads(posted.get('edit'))
         if edit.get('type') == 'ck':
             add_stmts = edit['add']
-            add_g = vstore.make_edit_graph(add_stmts)
-            subtract_g = vstore.get_subtract_graph(add_stmts)
+            add_g = tstore.make_edit_graph(add_stmts)
+            subtract_g = tstore.get_subtract_graph(add_stmts)
         elif edit.get('type') in [u'multi-tag']:
             add_stmts = edit.get('add')
             if (add_stmts is not None) and (add_stmts != {}):
                 add_g = Graph()
                 if add_stmts['object'] == u'new':
-                    uri, g = vstore.create_resource(
+                    uri, g = tstore.create_resource(
                         add_stmts['range'],
                         add_stmts['text']
                     )
@@ -44,21 +44,21 @@ class ResourceView(View):
                     obj_uri = URIRef(add_stmts['object'])
                     add_g.add((obj_uri, RDFS.label, Literal(add_stmts['text'])))
                     #Add type.
-                    atype = vstore.get_prop_from_abbrv(add_stmts['range'])
+                    atype = tstore.get_prop_from_abbrv(add_stmts['range'])
                     add_g.add((obj_uri, RDF.type, atype))
 
-                add_g += vstore.make_edit_graph(add_stmts)
+                add_g += tstore.make_edit_graph(add_stmts)
             else:
                 add_g = Graph()
             remove_stmts = edit.get('subtract')
             if remove_stmts is not None:
-                subtract_g = vstore.make_edit_graph(remove_stmts)
+                subtract_g = tstore.make_edit_graph(remove_stmts)
             else:
                 subtract_g = Graph()
         else:
             return HttpResponseServerError("Edit failed.  Edit type not recognized.")
 
-        done = vstore.add_remove(add_g, subtract_g)
+        done = tstore.add_remove(add_g, subtract_g)
         if done is True:
             return HttpResponse('', 200 )
         else:
@@ -78,7 +78,7 @@ class BasePropertyView(View):
         }
         """
         out = []
-        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+        for row in tstore.graph.query(rq, initBindings={'uri': uri}):
             d = {}
             d['uri'] = row.ra.toPython()
             d['id'] = d['uri']
@@ -94,9 +94,9 @@ class UniversityView(TemplateView, ResourceView, BasePropertyView):
         context = {}
         uri = D[local_name]
         context['uri'] = uri
-        context['name'] = vstore.graph.value(subject=uri, predicate=RDFS.label)
+        context['name'] = tstore.graph.value(subject=uri, predicate=RDFS.label)
         profile = {
-            'overview': vstore.graph.value(subject=uri, predicate=VIVO.overview),
+            'overview': tstore.graph.value(subject=uri, predicate=VIVO.overview),
         }
         prepared_sections = []
         for section in university:
@@ -114,7 +114,7 @@ class UniversityView(TemplateView, ResourceView, BasePropertyView):
 class IndexView(TemplateView, ResourceView):
     template_name = 'index.html'
 
-    def get_organizations(self, uri):
+    def get_organizations(self):
         rq = """
         select ?org ?label
         where {
@@ -125,7 +125,7 @@ class IndexView(TemplateView, ResourceView):
         LIMIT 10
         """
         out = []
-        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+        for row in tstore.graph.query(rq):
             d = {}
             d['uri'] = row.org.toPython().split('/')[-1]
             d['id'] = d['uri']
@@ -133,7 +133,7 @@ class IndexView(TemplateView, ResourceView):
             out.append(d)
         return out
 
-    def get_faculty(self, uri):
+    def get_faculty(self):
         rq = """
         select ?fac ?label
         where {
@@ -144,7 +144,7 @@ class IndexView(TemplateView, ResourceView):
         LIMIT 10
         """
         out = []
-        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+        for row in tstore.graph.query(rq):
             d = {}
             d['uri'] = row.fac.toPython().split('/')[-1]
             d['id'] = d['uri']
@@ -152,19 +152,23 @@ class IndexView(TemplateView, ResourceView):
             out.append(d)
         return out
 
-    def get_context_data(self, local_name=None, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        uri = D[local_name]
-        context['uri'] = uri
-        context['name'] = 'Index'
-        #orgs = {'id': 'orgs', 'label': 'Organizations'}
-        #faculty = {'id': 'fac', 'label': 'Faculty'}
-        orgs = self.get_organizations(uri)
-        faculty = self.get_faculty(uri)
-        #prepared_sections.append(orgs)
-        #prepared_sections.append(faculty)
-        context['orgs']  = orgs
-        context['people'] = faculty
+        url = self.request.resolver_match.url_name
+        if url == u'index':
+            context['name'] = 'Index'
+            orgs = self.get_organizations()
+            faculty = self.get_faculty()
+            context['orgs']  = orgs
+            context['people'] = faculty
+        elif url == u'people':
+            context['name'] = 'People'
+            faculty = self.get_faculty()
+            context['people'] = faculty
+        elif url == u'organizations':
+            context['name'] = 'Organizations'
+            orgs = self.get_organizations()
+            context['orgs'] = orgs
         return context
 
 class PersonView(TemplateView, ResourceView, BasePropertyView):
@@ -180,7 +184,7 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
         }
         """
         out = []
-        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+        for row in tstore.graph.query(rq, initBindings={'uri': uri}):
             d = {}
             d['uri'] = row.ra.toPython()
             d['id'] = d['uri']
@@ -197,7 +201,7 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
         }
         """
         out = []
-        for row in vstore.graph.query(rq, initBindings={'uri': uri}):
+        for row in tstore.graph.query(rq, initBindings={'uri': uri}):
             d = {}
             d['uri'] = row.org.toPython()
             d['id'] = d['uri']
@@ -230,7 +234,7 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
             }
         }
         """
-        data = vstore.graph.query(rq, initBindings={'fac': uri})
+        data = tstore.graph.query(rq, initBindings={'fac': uri})
         g = data.graph
         return {
             'name': g.value(subject=uri, predicate=D['name']),
@@ -243,15 +247,15 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
         uri = D[local_name]
         details = self.get_details(uri)
         context['uri'] = uri
+        context['local_name'] = uri
         #In production, this will need to be refactored because each call
         #to graph generates a SPARQL query.
         profile = {
-            'overview': vstore.graph.value(subject=uri, predicate=VIVO.overview),
-            'researchOverview': vstore.graph.value(subject=uri, predicate=VIVO.researchOverview),
-            'teachingOverview': vstore.graph.value(subject=uri, predicate=VIVO.teachingOverview),
+            'overview': tstore.graph.value(subject=uri, predicate=VIVO.overview),
+            'researchOverview': tstore.graph.value(subject=uri, predicate=VIVO.researchOverview),
+            'teachingOverview': tstore.graph.value(subject=uri, predicate=VIVO.teachingOverview),
         }
         profile.update(details)
-        print profile['orgs']
         prepared_sections = []
         for section in person:
             if section['id'] == 'researchArea':

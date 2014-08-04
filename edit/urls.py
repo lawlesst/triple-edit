@@ -12,6 +12,8 @@ from views import (
 
 
 urlpatterns = patterns('',
+    url(r'^people/$', IndexView.as_view(), name='people'),
+    url(r'^organizations/$', IndexView.as_view(), name='organizations'),
     url(r'^person/(?P<local_name>[a-z0-9]+)/$', PersonView.as_view(), name='person'),
     url(r'^org/(?P<local_name>[a-z0-9]+)/$', UniversityView.as_view(), name='organization'),
     url(r'^edit/', ResourceView.as_view(), name='edit'),
