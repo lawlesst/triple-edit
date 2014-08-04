@@ -1,7 +1,8 @@
 import os
 import logging
 
-from rdflib import plugin, Graph, ConjunctiveGraph, Literal, URIRef, Namespace, RDF, RDFS
+from rdflib import plugin, Graph, ConjunctiveGraph, Literal, URIRef, Namespace
+from rdflib import RDF, RDFS, OWL
 from rdflib.store import Store
 from rdflib.namespace import NamespaceManager, ClosedNamespace
 from rdflib.query import ResultException
@@ -17,6 +18,7 @@ VIVO = Namespace('http://vivoweb.org/ontology/core#')
 SCHEMA = Namespace('http://schema.org/')
 FOAF = Namespace('http://xmlns.com/foaf/0.1/')
 OBO = Namespace('http://purl.obolibrary.org/obo/')
+SKOS = Namespace('http://www.w3.org/2004/02/skos/core#')
 VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 #local data namespace
@@ -94,6 +96,10 @@ class BaseBackend(object):
             pred,
             obj,
         ))
+        #Add inverse statements.
+        iv = self.graph.value(subject=pred, predicate=OWL.inverseOf)
+        if iv is not None:
+            g.add((obj, iv, subj))
         return g
 
     def get_subtract_graph(self, triple):
