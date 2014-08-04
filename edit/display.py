@@ -48,7 +48,7 @@ person = [
    }
 ]
 
-university =[
+organization =[
    {
       'id':'overview',
       'predicate':'vivo:overview',

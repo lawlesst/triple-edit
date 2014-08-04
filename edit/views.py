@@ -17,7 +17,7 @@ ep = get_env('ENDPOINT')
 tstore = VivoBackend(ep)
 
 from backend import D, VIVO, RDF
-from display import university, person
+from display import organization, person
 
 class ResourceView(View):
 
@@ -86,33 +86,26 @@ class BasePropertyView(View):
             out.append(d)
         return out
 
-
-class UniversityView(TemplateView, ResourceView, BasePropertyView):
-    template_name = 'university.html'
-
-    def get_context_data(self, local_name=None, **kwargs):
-        context = {}
-        uri = D[local_name]
-        context['uri'] = uri
-        context['name'] = tstore.graph.value(subject=uri, predicate=RDFS.label)
-        profile = {
-            'overview': tstore.graph.value(subject=uri, predicate=VIVO.overview),
-        }
-        prepared_sections = []
-        for section in university:
-            if section['id'] == 'researchArea':
-                section['data'] = json.dumps(self.get_research_areas(uri))
-            elif section['id'] == 'placeResearchArea':
-                section['data'] = json.dumps(self.get_place_research_areas(uri))
-            else:
-                section['data'] = profile.get(section['id'])
-            prepared_sections.append(section)
-        context['sections']  = prepared_sections
-        context['profile'] = profile
-        return context
-
 class IndexView(TemplateView, ResourceView):
     template_name = 'index.html'
+
+    def get_groups(self):
+        rq = """
+        select ?org ?label
+        where {
+            ?org a foaf:Group .
+            ?org rdfs:label ?label .
+        }
+        ORDER BY ?label
+        """
+        out = []
+        for row in tstore.graph.query(rq):
+            d = {}
+            d['uri'] = row.org.toPython().split('/')[-1]
+            d['id'] = d['uri']
+            d['text'] = row.label.toPython()
+            out.append(d)
+        return out
 
     def get_organizations(self):
         rq = """
@@ -168,6 +161,8 @@ class IndexView(TemplateView, ResourceView):
         elif url == u'organizations':
             context['name'] = 'Organizations'
             orgs = self.get_organizations()
+            groups = self.get_groups()
+            orgs += groups
             context['orgs'] = orgs
         return context
 
@@ -290,6 +285,30 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
         context['profile'] = profile
         return context
 
+
+class OrganizationView(TemplateView, ResourceView, BasePropertyView):
+    template_name = 'organization.html'
+
+    def get_context_data(self, local_name=None, **kwargs):
+        context = {}
+        uri = D[local_name]
+        context['uri'] = uri
+        context['name'] = tstore.graph.value(subject=uri, predicate=RDFS.label)
+        profile = {
+            'overview': tstore.graph.value(subject=uri, predicate=VIVO.overview),
+        }
+        prepared_sections = []
+        for section in organization:
+            if section['id'] == 'researchArea':
+                section['data'] = json.dumps(self.get_research_areas(uri))
+            elif section['id'] == 'placeResearchArea':
+                section['data'] = json.dumps(self.get_place_research_areas(uri))
+            else:
+                section['data'] = profile.get(section['id'])
+            prepared_sections.append(section)
+        context['sections']  = prepared_sections
+        context['profile'] = profile
+        return context
 
 #
 # - Services for autcomplete widgets
