@@ -48,7 +48,7 @@ class BaseBackend(object):
     """
 
     def make_uuid_uri(self, prefix='n'):
-        return D[str(uuid.uuid4())]
+        return D[prefix + str(uuid.uuid4())]
 
     def get_prop_from_abbrv(self, prefix_prop):
         prefix, prop = prefix_prop.split(':')
