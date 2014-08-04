@@ -1,0 +1,37 @@
+# baseURI: http://topbraid.org/schema/
+
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix schemax: <http://topbraid.org/schemax/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+#VIVO
+@prefix vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#> .
+
+schema:Place
+  rdf:type owl:Class ;
+  rdfs:comment "Entities that have a somewhat fixed, physical extension." ;
+  rdfs:label "Place"^^xsd:string ;
+  rdfs:subClassOf owl:Thing ;
+.
+schema:affiliation
+  rdf:type owl:ObjectProperty ;
+  rdfs:comment "An organization that this person is affiliated with. For example, a school/university, a club, or a team." ;
+  rdfs:domain schema:Person ;
+  rdfs:label "affiliation"^^xsd:string ;
+  rdfs:range schema:Organization ;
+.
+schema:Organization
+  rdf:type owl:Class ;
+  rdfs:comment "An organization such as a school, NGO, corporation, club, etc." ;
+  rdfs:label "Organization"^^xsd:string ;
+  rdfs:subClassOf owl:Thing ;
+.
+
+#Display annotations for VIVO
+
+schema:Organization vitro:inClassGroup       <http://vivoweb.org/ontology#vitroClassGrouporganizations> .
+
+schema:Place vitro:inClassGroup       <http://vivoweb.org/ontology#vitroClassGrouplocations> .
