@@ -1,10 +1,9 @@
 #triple-edit
 
-This is a Django application for editing RDF data.  It's a proof-of-concept.  It was designed with the [VIVO](http://vivoweb.org) research networking system in mind, but in principle, it should work with any triple store that you can write to from Python code.
-
->This application was created for the [2014 VIVO Conference Apps and Tools workshop](https://www.etouches.com/ehome/80403/189150/).  There are currently no plans to maintain or support it.
+This is a Django application for editing RDF data.  created for the [2014 VIVO Conference Apps and Tools workshop](https://www.etouches.com/ehome/80403/189150/).  It's a proof-of-concept designed with the [VIVO](http://vivoweb.org) research networking system in mind, but in principle, it should work with any triple store that you can write to from Python code.  There are currently no plans to maintain or support it.
 
 ##Functionality
+
  * [ckeditor](http://ckeditor.com/) for editing data properties containing text
 
  * [Select2](http://ivaynberg.github.io/select2/) tagging widgets which allow for the easy lookup of entities and establishing relations with those.  In the sample application the [FAST](http://fast.oclc.org/searchfast/) web service is used to lookup skos:Concepts.
