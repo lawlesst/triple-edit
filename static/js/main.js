@@ -78,7 +78,7 @@ function setupMultiTag() {
         var range = $(elem).data('range');
         var uri = $(elem).data('subject')
         var prop = $(elem).data('predicate')
-        if (range == 'vivo:ResearchArea') {
+        if (range == 'skos:Concept') {
             var endpoint = KEYWORD_SERVICE;
         } else if (range == 'schema:Place') {
             var endpoint = PLACE_SERVICE;
