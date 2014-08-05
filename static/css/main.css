@@ -43,6 +43,9 @@ h1.title a, h1.title a:visited {
   text-decoration: none;
 }
 
+.multitag {
+  min-width: 40%;
+}
 
 
 
