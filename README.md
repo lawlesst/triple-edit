@@ -8,7 +8,7 @@ This is a Django application for editing RDF data created for the [2014 VIVO Con
 
  * [Select2](http://ivaynberg.github.io/select2/) tagging widgets which allow for the easy lookup of entities and establishing relations with those.  In the sample application the [FAST](http://fast.oclc.org/searchfast/) web service is used to lookup skos:Concepts.
 
- * [HTML5 boilerplate](http://www.initializr.com/try) and is repsonsive, which makes it mobile friendly.
+ * [HTML5 boilerplate](http://www.initializr.com/try) is used for responsive templating, which makes it mobile friendly.
 
 ##Use cases - what could I do with this?
 
