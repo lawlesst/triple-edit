@@ -1,17 +1,31 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row">
-    <h2> {{ profile.name }}</h2>
+<div class="row resource" data-uri="{{ profile.wikidata }}">
+    <h2> {{ profile.label }}</h2>
+    <img class="thumbnail" />
+    <h5 id="description"></h5>
     {% if profile.title %}
         <h4> {{ profile.title }}</h4>
     {% endif %}
-    {% if profile.orgs %}
-        <h5>Affiliations</h5>
-        {% for porg in profile.orgs %}
-          <h6> <a href="{% url 'edit:organization' local_name=porg.id %}">{{ porg.name }}</a></h6>
-        {% endfor %}
+    {% if profile.wikidata %}
+    <div id="abstract">
+        <div>
+            <img class="thumbnail" />
+             <h5 id="description"></h5>
+            <p></p>
+        </div>
+    </div>
     {% endif %}
+    <ul>
+      <li><a href="http://dblightcit.services.brown.edu/find/catalog?q=%22{{ profile.label }}%22">Items in the library</a></li>
+      {% if profile.wikidata %}
+      <li>Wikidata: <a href="http://www.wikidata.org/wiki/{{ profile.wikidata }}">{{ profile.wikidata }}</a></li>
+      {% endif %}
+      {% if profile.viaf %}
+      <li>VIAF: <a href="http://viaf.org/viaf/{{ profile.viaf }}">{{ profile.viaf }}</a></li>
+      {% endif %}
+    </ul>
     {% for section in sections %}
       <h3>{{ section.label }}</h3>
       {% if section.etype == "ckedit" %}
@@ -24,6 +38,55 @@
       <hr/>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+
+$(document).ready(function () {
+  processResource();
+});
+
+function processResource() {
+    $('.resource').each(function (index) {
+        var uri = $(this).data('uri');
+        fetchWikiData(uri);
+    });
+}
 
 
+function fetchWikiData(pageID) {
+    var apiURL = 'http://www.wikidata.org/w/api.php?action=wbgetentities&sites=enwiki&languages=en&props=sitelinks|descriptions&format=json&callback=?&ids=' + pageID;
+    console.debug(apiURL);
+    $.getJSON(apiURL, function (data) {
+        console.debug(data);
+        if (data.error == undefined) {
+          var winfo = data.entities[pageID];
+          $('#description').text(winfo.descriptions.en.value);
+          var wikipediaID = winfo.sitelinks.enwiki.title;
+          fetchWikipedia(wikipediaID);
+        };
+    });
+}
+
+function fetchWikipedia(title) {
+    var apiURL = 'http://en.wikipedia.org/w/api.php?callback=?&action=query&prop=pageimages|extracts&format=json&pithumbsize=250&exlimit=1&exsentences=3&titles=' + escape(title);
+    console.debug(apiURL);
+    $.getJSON(apiURL, function (data) {
+        console.debug(data);
+        var pageID = Object.keys(data.query.pages)[0]
+        var winfo = data.query.pages[pageID];
+        $('#abstract p').text(stripHTML(winfo.extract));
+        $('#abstract img.thumbnail').attr('src', winfo.thumbnail.source);
+        $('#abstract img.thumbnail').show();
+        //debugger;
+    });
+}
+
+function stripHTML(dirtyString) {
+    var container = document.createElement('div');
+    container.innerHTML = dirtyString;
+    return container.textContent || container.innerText;
+}
+</script>
 {% endblock %}

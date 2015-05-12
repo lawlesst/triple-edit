@@ -12,9 +12,9 @@ from services import FASTService, VIVOService
 #Setup a triple store
 # from backend import SQLiteBackend
 # tstore =SQLiteBackend()
-from backend import VivoBackend
+from backend import FusekiBackend
 ep = get_env('ENDPOINT')
-tstore = VivoBackend(ep)
+tstore = FusekiBackend(ep, get_env('FUSEKI_UPDATE'))
 
 from backend import D, VIVO, RDF
 from display import organization, person
@@ -147,6 +147,24 @@ class IndexView(TemplateView, ResourceView):
             out.append(d)
         return out
 
+    def get_people(self):
+        rq = """
+        select ?person ?name
+        where {
+            ?person a schema:Person ;
+                rdfs:label ?name
+        }
+        LIMIT 10
+        """
+        out = []
+        for row in tstore.graph.query(rq):
+            d = {}
+            d['uri'] = row.person.toPython().split('/')[-1]
+            d['id'] = d['uri']
+            d['text'] = row.name.toPython()
+            out.append(d)
+        return out
+
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         url = self.request.resolver_match.url_name
@@ -158,7 +176,7 @@ class IndexView(TemplateView, ResourceView):
             context['people'] = faculty
         elif url == u'people':
             context['name'] = 'People'
-            faculty = self.get_faculty()
+            faculty = self.get_people()
             context['people'] = faculty
         elif url == u'organizations':
             context['name'] = 'Organizations'
@@ -258,19 +276,17 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
         }
 
     def get_context_data(self, local_name=None, **kwargs):
+        from display import NameAuthority
         context = super(PersonView, self).get_context_data(**kwargs)
         uri = D[local_name]
         details = self.get_details(uri)
         context['uri'] = uri
         context['local_name'] = uri
-        #In production, this will need to be refactored because each call
-        #to graph generates a SPARQL query.
-        profile = {
-            'overview': tstore.graph.value(subject=uri, predicate=VIVO.overview),
-            'researchOverview': tstore.graph.value(subject=uri, predicate=VIVO.researchOverview),
-            'teachingOverview': tstore.graph.value(subject=uri, predicate=VIVO.teachingOverview),
-        }
-        profile.update(details)
+        na = NameAuthority(uri=uri, store=tstore.graph)
+        profile = na.as_dict()
+        #import ipdb; ipdb.set_trace()
+        context['profile'] = profile
+        context['title'] = profile['label']
         prepared_sections = []
         for section in person:
             if section['id'] == 'researchArea':
@@ -279,13 +295,10 @@ class PersonView(TemplateView, ResourceView, BasePropertyView):
                 section['data'] = json.dumps(self.get_place_research_areas(uri))
             elif section['id'] == 'affiliations':
                 section['data'] = json.dumps(self.get_affiliations(uri))
-            elif section['id'] == 'collaborators':
-                section['data'] = json.dumps(self.get_collaborators(uri))
             else:
                 section['data'] = profile.get(section['id'])
             prepared_sections.append(section)
         context['sections']  = prepared_sections
-        context['profile'] = profile
         return context
 
 

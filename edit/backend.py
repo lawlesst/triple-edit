@@ -20,6 +20,8 @@ FOAF = Namespace('http://xmlns.com/foaf/0.1/')
 OBO = Namespace('http://purl.obolibrary.org/obo/')
 SKOS = Namespace('http://www.w3.org/2004/02/skos/core#')
 VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
+SCHEMA = Namespace('http://schema.org/')
+HUB = Namespace("http://library.brown.edu/ontology/hub")
 
 #local data namespace
 d = get_env('NAMESPACE')
@@ -193,3 +195,26 @@ class SQLiteBackend(BaseBackend):
             self.graph.add(trip)
         self.graph.commit()
         return True
+
+
+class FusekiBackend(BaseBackend):
+
+    def __init__(self, endpoint, update_endpoint):
+        graph = ConjunctiveGraph('SPARQLUpdateStore')
+        graph.open((endpoint, update_endpoint))
+        graph.namespace_manager=ns_mgr
+        self.graph = graph
+        self.default_graph = 'http://vitro.mannlib.cornell.edu/default/vitro-kb-2'
+
+    def add_remove(self, add_g, subtract_g, name=None):
+        g = self.graph.get_context(name or self.default_graph)
+        #for trip in subtract_g:
+        g -= subtract_g
+        g += add_g
+        return True
+
+
+if __name__ == "__main__":
+    ep = 'http://localhost:3030/authority/'
+    vs = FusekiBackend((ep + 'query', ep + 'update'))
+    print vs

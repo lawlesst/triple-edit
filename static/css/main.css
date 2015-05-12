@@ -47,6 +47,11 @@ h1.title a, h1.title a:visited {
   min-width: 40%;
 }
 
+img.thumbnail {
+  float: right;
+  display: inline;
+  margin-left: 1em;
+}
 
 
 
