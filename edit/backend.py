@@ -23,6 +23,10 @@ VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 SCHEMA = Namespace('http://schema.org/')
 HUB = Namespace("http://library.brown.edu/ontology/hub")
 
+#Fuseki
+TEXT = Namespace("http://jena.apache.org/text#")
+AFN = Namespace("http://jena.hpl.hp.com/ARQ/function#")
+
 #local data namespace
 d = get_env('NAMESPACE')
 D = Namespace(d)

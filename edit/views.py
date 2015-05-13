@@ -1,6 +1,7 @@
 
 from django.http import HttpResponse, HttpResponseServerError
 from django.views.generic import TemplateView, View
+from django.core.urlresolvers import reverse
 
 import json
 
@@ -377,4 +378,34 @@ class VIVOCollaboratorsAutocompleteView(JSONServiceView):
         query = self.request.GET.get('query')
         out = vs.get(query, VIVO['FacultyMember'].toPython())
         context['results'] = out
+        return self.render_to_response(context)
+
+class PersonSearchView(JSONServiceView):
+    def get(self, request, *args, **kwargs):
+        context = {}
+        query = self.request.GET.get('q') or self.request.GET.get('query')
+        if query is None:
+            raise HttpResponseServerError("No query provided")
+        rq = """
+        SELECT ?f ?name ?auth
+        WHERE {
+            ?f text:query (rdfs:label "==query==" 10) .
+            ?f a schema:Person ;
+                rdfs:label ?name .
+            BIND(afn:localname(?f) as ?auth)
+        }
+        """.replace('==query==', query)
+        print query
+        print rq
+        out = []
+        for row in tstore.graph.query(rq):
+            #import ipdb; ipdb.set_trace()
+            profile = reverse('edit:person', kwargs={'local_name': row.auth.toPython()})
+            out.append(dict(
+                uri=row.f,
+                label=row.name,
+                local_name=row.auth,
+                profile=self.request.build_absolute_uri(profile),
+            ))
+        context['individual'] = out
         return self.render_to_response(context)

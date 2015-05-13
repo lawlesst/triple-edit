@@ -8,7 +8,9 @@ from views import (
     FASTTopicAutocompleteView,
     FASTPlaceAutocompleteView,
     FASTOrganizationAutocompleteView,
-    VIVOCollaboratorsAutocompleteView
+    VIVOCollaboratorsAutocompleteView,
+    PersonSearchView
+
 )
 
 
@@ -22,6 +24,7 @@ urlpatterns = patterns('',
     url(r'^service/fast/place/$', FASTPlaceAutocompleteView.as_view(), name='fast-place'),
     url(r'^service/fast/org/$', FASTOrganizationAutocompleteView.as_view(), name='fast-org'),
     url(r'^service/vivo/collaborators/$', VIVOCollaboratorsAutocompleteView.as_view(), name='vivo-collaborators'),
+    url(r'^service/person/search/$', PersonSearchView.as_view(), name='people-search'),
     #everything else
     url(r'^$', IndexView.as_view(), name='index')
 )

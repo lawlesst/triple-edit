@@ -1,5 +1,5 @@
 from vdm.models import VResource
-from backend import HUB, VIVO
+from backend import HUB, VIVO, TEXT, AFN
 #TMP = Namespace('http://localhost/tmp/')
 
 class NameAuthority(VResource):
@@ -37,7 +37,6 @@ class NameAuthority(VResource):
             viaf=self.get_first_literal(HUB.viaf),
             overview=self.get_first_literal(VIVO.overview)
         )
-
 
 
 

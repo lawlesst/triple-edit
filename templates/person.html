@@ -77,8 +77,10 @@ function fetchWikipedia(title) {
         var pageID = Object.keys(data.query.pages)[0]
         var winfo = data.query.pages[pageID];
         $('#abstract p').text(stripHTML(winfo.extract));
-        $('#abstract img.thumbnail').attr('src', winfo.thumbnail.source);
-        $('#abstract img.thumbnail').show();
+        if (winfo.thumbnail != null) {
+          $('#abstract img.thumbnail').attr('src', winfo.thumbnail.source);
+          $('#abstract img.thumbnail').show();
+        }
         //debugger;
     });
 }
