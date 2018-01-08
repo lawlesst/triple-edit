@@ -1,8 +1,8 @@
-#triple-edit
+# triple-edit
 
 This is a Django application for editing RDF data created for the [2014 VIVO Conference Apps and Tools workshop](https://www.etouches.com/ehome/80403/189150/).  It's a proof-of-concept designed with the [VIVO](http://vivoweb.org) research networking system in mind, but in principle, it should work with any triplestore that supports SPARQL read queries and SPARQL updates from Python code.
 
-##Functionality
+## Functionality
 
  * [ckeditor](http://ckeditor.com/) for editing data properties containing text.
 
@@ -10,11 +10,11 @@ This is a Django application for editing RDF data created for the [2014 VIVO Con
 
  * [HTML5 boilerplate](http://www.initializr.com/try) is used for responsive templating, which makes it mobile friendly.
 
-##Use cases - what could I do with this?
+## Use cases - what could I do with this?
 
- * create an application that allows researchers to manager and update [VIVO](http://vivoweb.org) research profiles.
+ * create an application that allows researchers to manage and update [VIVO](http://vivoweb.org) research profiles.
 
- * create a mobile or table application that allows for straightforward editing of a subset of triplestore data by end users.
+ * create a mobile or tablet application that allows for straightforward editing of a subset of triplestore data by end users.
 
  * as a data curating or cleaning tool.  SPARQL queries could pull problematic data from your triplestore and the built in widgets (or new widgets) could be used by staff to clean or augment the data.
 
@@ -22,7 +22,7 @@ This is a Django application for editing RDF data created for the [2014 VIVO Con
 
 A [presentation](https://www.youtube.com/watch?v=cMprPKBRCl4) is available on YouTube that highlights some of the functionality and motivations behind using an application like this to manage data in a triple store.
 
-##Install
+## Install
 
  * clone the repository
  * create a Python virtualenv and activate it
@@ -33,12 +33,12 @@ A [presentation](https://www.youtube.com/watch?v=cMprPKBRCl4) is available on Yo
  * run `python manage.py runserver` to start up the Django development serve
  * visit `http://localhost:8000` in your browser.  There should be a listing of people and organizations if your connection to a SPARQL endpoint is configured properly and there is people and organization data in the triple store you are querying.
 
-##Dependencies
+## Dependencies
 
  * A SPARQL endpoint to issue queries against.  VIVO implementors should see [setting up a SPARQL endpoint](https://wiki.duraspace.org/display/VIVO/Setting+up+a+VIVO+SPARQL+Endpoint).
  * A "backend" to write the updated data to.  See below.  This application was developed with [VIVO](http://vivoweb.org) in mind so there is a bundled VIVO backend that works with version of VIVO > 1.6.
 
-##Development
+## Development
 
 To make ready use of this application, you would need access to a [VIVO](http://github.com/lawlesst/vivo-vagrant) instance with [sample data](http://github.com/lawlesst/vivo-sample-data).
 
